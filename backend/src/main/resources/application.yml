@@ -1,0 +1,145 @@
+# ============================================================
+# LibMS 图书借阅管理系统 - 后端配置
+# 说明：数据库口令与 JWT 签名密钥为敏感信息，不提供默认值、必须通过环境变量注入，
+#       缺失时启动即失败（fail-fast），避免生产环境误用默认口令。
+# 实际使用时，可通过以下任一方式配置：
+#   1. 环境变量：export DB_USERNAME=root  DB_PASSWORD=你的密码  JWT_SECRET=随机长密钥
+#   2. 启动参数：--DB_PASSWORD=你的密码 --JWT_SECRET=随机长密钥
+#   3. 本地开发（IDEA）：在 Run Configuration 的 Environment variables 中配置上述变量
+# ============================================================
+
+server:
+  port: 8080            # 后端监听端口（前端 vite 代理指向这里）
+  # 响应压缩：仅当客户端显式声明 Accept-Encoding: gzip 时才启用（脚本/旧客户端行为不变），
+  # 与 nginx 的 gzip 形成双保险，保证"不经 nginx 直连后端"的场景同样有压缩
+  compression:
+    enabled: true
+    min-response-size: 2048
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,text/javascript,application/javascript
+
+spring:
+  application:
+    name: libms-backend
+  # ---- 数据库连接（MySQL 8.0，库名 library_db，对应 docs/04_数据库设计.sql）----
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:library_db}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD}
+    # 连接池容量说明（显式化，取值与 HikariCP 默认一致，行为不变）：
+    # 本项目为单实例部署，借/还等写事务单笔含 6~8 条语句并持有连接至提交，
+    # 默认 maximum-pool-size=10 / connection-timeout=30s 可满足；如需调整在此显式覆盖，勿依赖框架默认值的隐式变化。
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 30000
+  # ---- 文件上传（图书封面等）----
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 20MB
+  # ---- Jackson 日期格式 ----
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  # ---- 定时任务线程池：预约回收 / 通知扫描 / 邮件投递互不阻塞 ----
+  task:
+    scheduling:
+      pool:
+        size: ${SCHEDULING_POOL_SIZE:3}
+  # ---- 邮件（app.notification.email.enabled=true 时才会真正发送）----
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:25}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:false}
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+          starttls:
+            enable: ${MAIL_STARTTLS:false}
+
+# ---- MyBatis-Plus 配置 ----
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true   # 下划线字段 ↔ 驼峰属性自动映射
+    # SQL 日志实现：默认关闭。StdOutImpl 会把 SQL 语句与全部参数实参（含 password 列、姓名、手机号）
+    # 打到标准输出，属敏感信息泄露，故默认取安全值；开发期需要观察 SQL 时通过环境变量显式打开：
+    #   MYBATIS_LOG_IMPL=org.apache.ibatis.logging.stdout.StdOutImpl  MYBATIS_LOG_LEVEL=debug
+    log-impl: ${MYBATIS_LOG_IMPL:org.apache.ibatis.logging.nologging.NoLoggingImpl}
+  global-config:
+    db-config:
+      id-type: auto                      # 主键自增
+      logic-delete-field: deleted        # 逻辑删除字段（全局默认）
+      logic-delete-value: 1              # 已删除
+      logic-not-delete-value: 0          # 未删除
+
+# ---- JWT 配置（密钥无默认值，必须通过环境变量注入；长度须 ≥ 32 字节）----
+jwt:
+  secret: ${JWT_SECRET}
+  expire: ${JWT_EXPIRE:86400000}   # 令牌有效期（毫秒），默认 24 小时；生产可注入 JWT_EXPIRE=7200000 缩短至 2 小时（无吊销机制时的最小缓解）
+  header: token                # 前端携带令牌的请求头名称
+
+# ---- 审计来源可信性 ----
+# X-Forwarded-For 由客户端可控，默认不信任（直连时用 RemoteAddr，防伪造审计 IP）。
+# 生产部署在 Nginx 之后时，由 Nginx 用 proxy_set_header X-Forwarded-For $remote_addr 覆盖该头，
+# 此时可设 APP_TRUST_FORWARDED_HEADER=true 取真实客户端 IP（兼容旧变量名 TRUST_FORWARDED_HEADER）。
+app:
+  trust-forwarded-header: ${APP_TRUST_FORWARDED_HEADER:${TRUST_FORWARDED_HEADER:false}}
+  # 接口文档面（/doc.html、/v3/api-docs）：本地开发默认开启，容器/生产建议 false。
+  # knife4j/springdoc 自身的开关无法关闭静态资源面（见文件末尾实测说明），故由 ApiDocsAccessFilter 兜底。
+  api-docs:
+    enabled: ${APP_API_DOCS_ENABLED:true}
+  # 读者自助注册限流（进程内滑动窗口；单实例部署，与登录防爆破同口径）
+  register:
+    max-per-ip: ${APP_REGISTER_MAX_PER_IP:5}          # 单 IP 窗口内最多注册次数
+    window-minutes: ${APP_REGISTER_WINDOW_MINUTES:60} # 窗口长度（分钟）
+    global-max: ${APP_REGISTER_GLOBAL_MAX:200}        # 全进程窗口内注册总量上限（防分布式灌号）
+  # 预约过期回收定时任务（毫秒）
+  reservation:
+    expire-scan-ms: ${APP_RESERVATION_EXPIRE_SCAN_MS:300000}        # 每 5 分钟扫描一次
+    expire-initial-delay-ms: ${APP_RESERVATION_EXPIRE_DELAY_MS:60000} # 启动后 1 分钟首扫
+  # 站内通知与邮件通道（2026-10-23 推荐项）
+  notification:
+    due-soon-days: ${APP_NOTIFY_DUE_SOON_DAYS:3}          # 到期前 N 天提醒
+    card-expiring-days: ${APP_NOTIFY_CARD_EXPIRING_DAYS:30} # 借阅证到期前 N 天提醒
+    retention-days: ${APP_NOTIFY_RETENTION_DAYS:180}      # 已读通知保留天数（超期物理清理）
+    reminder-cron: ${APP_NOTIFY_REMINDER_CRON:0 0 8 * * ?} # 提醒扫描（默认每天 08:00）
+    email:
+      enabled: ${MAIL_ENABLED:false}                      # 默认关闭：断网/无凭据时站内通知照常可用
+      from: ${MAIL_FROM:no-reply@libms.local}
+      max-attempts: ${MAIL_MAX_ATTEMPTS:5}
+      batch-size: ${MAIL_BATCH_SIZE:50}
+      skip-if-read: ${MAIL_SKIP_IF_READ:true}
+
+# ---- CORS 跨域（生产收紧：仅允许配置的前端来源携带凭证，默认开发端口）----
+cors:
+  # 逗号分隔多个来源：vite server.host=127.0.0.1 时控制台打印 127 地址，
+  # 只放行 localhost 会导致浏览器经代理登录被拒（实测 403 Invalid CORS request）
+  allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:5173,http://127.0.0.1:5173}
+
+# ---- 文件存储路径（上传文件落盘位置）----
+file:
+  # 上传目录（预留，当前无上传功能）：相对路径随启动目录漂移，生产部署须注入绝对路径 FILE_UPLOAD_DIR
+  upload-dir: ${FILE_UPLOAD_DIR:./upload}
+
+# ---- Knife4j 接口文档配置 ----
+knife4j:
+  # 接口文档增强开关（默认开启）。
+  # ⚠️ 实测结论（2026-09-12）：本开关（以及 knife4j.production、springdoc.api-docs.enabled、
+  # springdoc.swagger-ui.enabled）**都无法关闭文档访问面**——/doc.html 由依赖内的 META-INF/resources
+  # 静态资源提供、/v3/api-docs 由 springdoc 提供，四组开关逐一实测均仍返回 200。
+  # 因此生产环境的文档面关闭放在 Nginx 层（见 deploy/nginx.conf 的「生产关闭接口文档」段）。
+  enable: true
+  setting:
+    language: zh_cn
+
+# ---- 日志 ----
+logging:
+  level:
+    com.library: ${LIBMS_LOG_LEVEL:info}
+    com.library.mapper: ${MYBATIS_LOG_LEVEL:info}      # 默认 info（不打印 SQL 与参数实参）；开发期可用 debug 显式打开

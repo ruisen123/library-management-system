@@ -1,0 +1,121 @@
+# LibMS 一键部署（MySQL + 后端 + 前端）
+# 用法：
+#   cd deploy/docker
+#   cp .env.example .env      # 填入自己的口令与 JWT 密钥（至少 32 字节）
+#   docker compose up -d --build
+#   浏览器访问 http://localhost:8088  （admin / 123456）
+#   docker compose down        # 停止但保留数据卷
+#   docker compose down -v     # 停止并清空数据库卷（下次 up 会重新导入 docs/04 种子）
+#
+# 说明：
+#   · 仅前端 8088 对外暴露；MySQL 与后端只在容器网络内可达，不映射宿主端口。
+#   · 首次 up 时 MySQL 官方镜像会在空数据卷上执行挂载到 /docker-entrypoint-initdb.d 的
+#     docs/04_数据库设计.sql（建库 + 建表 + 种子数据）；已有数据卷不会重复执行，
+#     需要重置时执行 `docker compose down -v`。
+#   · 数据库口令与 JWT 密钥必须写在 .env（不入库）；缺失时 compose 直接报错退出。
+
+name: libms
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 .env 中设置 MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-library_db}
+      MYSQL_USER: ${MYSQL_USER:-libms}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?请在 .env 中设置 MYSQL_PASSWORD}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ../../docs/04_数据库设计.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      # 探测走 TCP 127.0.0.1：MySQL 官方镜像初始化阶段的临时实例只监听 socket，
+      # 因此 ping 成功即代表"真正可对外服务"；首次建库导种子需要较宽限期
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      # 首次建卷要跑完系统表初始化 + 导入 docs/04（实测本机约 2 分钟），宽限期给足
+      start_period: 300s
+    networks:
+      - libms
+
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: ${MYSQL_DATABASE:-library_db}
+      DB_USERNAME: ${MYSQL_USER:-libms}
+      DB_PASSWORD: ${MYSQL_PASSWORD:?请在 .env 中设置 MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?请在 .env 中设置 JWT_SECRET（长度 >= 32 字节）}
+      JWT_EXPIRE: ${JWT_EXPIRE:-86400000}
+      # 浏览器带 Origin 的请求会走 CORS 校验：换端口/域名部署时必须把前端来源加进来，
+      # 否则登录会 403 Invalid CORS request（默认值对齐本 compose 的 WEB_PORT）
+      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN:-http://localhost:${WEB_PORT:-8088},http://127.0.0.1:${WEB_PORT:-8088}}
+      TZ: Asia/Shanghai
+      # 经容器 Nginx 反代时，服务端看到的 RemoteAddr 是 Nginx 容器 IP：
+      # 必须信任 Nginx 写入的 X-Forwarded-For（其值为 $remote_addr，非追加，无法伪造首段），
+      # 否则注册限流 5 次/60 分钟会变成"全站共享 5 次"，审计 IP 也全变成 172.x。
+      APP_TRUST_FORWARDED_HEADER: ${APP_TRUST_FORWARDED_HEADER:-true}
+      # 接口文档面默认不在容器环境暴露（直连后端 8080 时也不可匿名访问）
+      APP_API_DOCS_ENABLED: ${APP_API_DOCS_ENABLED:-false}
+      # 通知与邮件通道（默认关闭邮件，站内通知始终可用）
+      MAIL_ENABLED: ${MAIL_ENABLED:-false}
+      MAIL_FROM: ${MAIL_FROM:-no-reply@libms.local}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-25}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-false}
+      MAIL_STARTTLS: ${MAIL_STARTTLS:-false}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      # 探测的真实语义（2026-10-24 审计修正）：后端统一"HTTP 200 承载业务码"
+      # （AuthInterceptor.java:114 setStatus(200)），无令牌访问 /books 恒为 HTTP 200，
+      # 401 只出现在响应体里 —— 下面的 401 分支实际不会命中，只证明"进程已就绪并能响应 HTTP"。
+      # 特别注意：数据库不可用时 /books 仍返回 200（无令牌在 AuthInterceptor.java:47-50 提前返回，
+      # 不会走到查库），故 healthy ≠ DB 连通；需要真探数据库请另加依赖 DB 的探针。
+      # 注意：compose 会插值 $var，shell 自身变量必须写成 $$code
+      test: ["CMD-SHELL", "code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/books); [ \"$$code\" = 401 ] || [ \"$$code\" = 200 ]"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 45s
+    networks:
+      - libms
+
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8088}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    networks:
+      - libms
+
+volumes:
+  mysql-data:
+
+networks:
+  libms:
+    driver: bridge

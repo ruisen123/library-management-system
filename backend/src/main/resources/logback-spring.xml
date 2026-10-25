@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  LibMS 日志配置
+  目的（docs/28 N12-3）：
+    1) 请求关联 ID：pattern 中的 %X{requestId} 由 RequestIdFilter 注入，用于把同一请求的多条日志聚合；
+    2) 日志滚动：应用日志落到 logs/libms.log 并按「大小 + 日期」滚动，保留 30 天 / 上限 2GB，
+       修复原先 `nohup ... > app.log` 单文件无限增长的问题。
+  说明：控制台沿用 Spring Boot 默认的 CONSOLE appender（格式与原先完全一致），
+       因此 start.sh 重定向出的 app.log 内容不变，仅额外多出滚动文件。
+-->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <!-- 滚动文件：带请求关联 ID；日志目录可通过 LOG_PATH 环境变量覆盖（默认工作目录下 logs/） -->
+    <springProperty scope="context" name="LOG_PATH" source="logging.file.path" defaultValue="logs"/>
+    <property name="FILE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId:-}] [%thread] %logger{36} - %msg%n"/>
+
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/libms.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/libms.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ROLLING"/>
+    </root>
+</configuration>

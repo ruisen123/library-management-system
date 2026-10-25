@@ -1,0 +1,212 @@
+/* ============================================================
+   LibMS 全局样式 —— 依据 docs/06_UI风格设计文档.md
+   主色「知识蓝 #2B6CB0」通过覆盖 Element Plus CSS 变量全局生效
+   ============================================================ */
+
+/* 1. 覆盖 Element Plus 主色变量（含浅色阶/深色阶派生） */
+:root {
+  --el-color-primary: #2b6cb0;
+  --el-color-primary-light-3: #5a8cc6;
+  --el-color-primary-light-5: #8ab1d9;
+  --el-color-primary-light-7: #bbd4ec;
+  --el-color-primary-light-8: #d6e4f5;
+  --el-color-primary-light-9: #ebf3fb;
+  --el-color-primary-dark-2: #22568d;
+  /* 项目自用设计变量 */
+  --libms-aside: #1f3552; /* 侧边栏深墨蓝 */
+  --libms-secondary: #2c7a7b; /* 辅色青墨绿 */
+  --libms-accent: #c05621; /* 强调暖赭橙 */
+  --libms-bg: #f5f7fa; /* 页面画布 */
+  --libms-border: #e4e7ed;
+  /* 侧边栏展开宽度（折叠时由 Layout.vue 置为 64px）。弹窗按它让位，见第 9 节 */
+  --libms-aside-w: 240px;
+  /* 加载遮罩底色：Element Plus 默认 #ffffffe6（90% 白），盖在本就白色的 .page-card 上，
+     观感就是"整个界面一片白"。改为与页面画布同色系的半透明，让底下的表格骨架透出来。
+     注意：只把颜色改成灰而不降不透明度几乎没用（实测差异仅 2.24%），必须降不透明度。 */
+  --el-mask-color: rgba(245, 247, 250, 0.5);
+}
+
+/* 2. 全局字体栈（跨平台，答辩环境零风险） */
+body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  color: #606266;
+  background: var(--libms-bg);
+  -webkit-font-smoothing: antialiased;
+  /* margin 必须归零：浏览器默认 body { margin: 8px }，会让文档比视口高 16px、页面长期挂着一条
+     竖向滚动条；弹窗打开时 Element Plus 给 body 加 overflow:hidden 锁背景滚动，那条滚动条一消失，
+     内容区就宽出约 15px —— 表现为"打开弹窗后整个界面往右跳一下"。
+     归零后界面铺满窗口，不再出现 body 级滚动条，位移从根上消除。
+     配套：Navbar.vue / Layout.vue 的内边距已同步 +8px，保证文字与卡片的位置与改动前一致。 */
+  margin: 0;
+}
+
+/* 3. 通用布局类 */
+.page-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+/* 卡片标题：左侧 3px 主色竖条装饰（对齐 06 文档） */
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 16px;
+}
+.card-title::before {
+  content: '';
+  width: 3px;
+  height: 16px;
+  background: var(--el-color-primary);
+  border-radius: 2px;
+}
+/* 检索工具栏 */
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; align-items: center; }
+.toolbar .el-input, .toolbar .el-select { width: 200px; }
+/* 分页统一右下角 */
+.pager { display: flex; justify-content: flex-end; margin-top: 16px; }
+
+/* 4. 统计总览卡片 */
+.stat-row { display: flex; gap: 24px; margin-bottom: 16px; }
+.stat-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+.stat-num { font-size: 28px; font-weight: 600; color: #303133; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.stat-label { font-size: 12px; color: #909399; }
+
+/* 5. 图表并排布局 */
+.chart-flex { display: flex; gap: 16px; }
+.chart-flex > div { flex: 1; min-width: 0; }
+
+/* 6. 登录页 */
+.login-bg {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1f3552 0%, #2b6cb0 100%);
+}
+.login-card {
+  width: 420px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 40px 36px 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+.login-brand { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 6px; }
+.login-title { text-align: center; font-size: 20px; font-weight: 600; color: #303133; margin-bottom: 4px; }
+.login-sub { text-align: center; font-size: 12px; color: #909399; margin-bottom: 24px; }
+.quick-btn { width: 100%; margin-top: 8px; }
+
+/* 7. 通用文本工具类 */
+.text-danger { color: var(--el-color-danger); }
+.text-warning { color: var(--el-color-warning); }
+.text-muted { color: #909399; }
+
+/* 8. 加载体验：遮罩只作用于数据区 + 新内容淡入
+   —— 切页时旧内容被瞬间换成"空卡片 + 加载遮罩"，而遮罩默认 90% 白又盖住整张卡片
+      （标题 / 工具栏 / Tab 头全被糊掉），所以观感是"整个界面变白"。
+      实测：遮罩覆盖时长中位 55ms，"旧页面消失"与"遮罩出现"是同一瞬间，
+      并不存在独立的空白阶段 —— 那个"白"就是遮罩本身。
+   —— 乙：遮罩换色并降低不透明度（见上方 --el-mask-color）+ 新内容淡入，消除"啪一下弹出"。*/
+@keyframes libmsFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.layout-main > div {
+  animation: libmsFadeIn 0.18s ease;
+}
+
+/* —— 甲：加载期间把卡片"骨架"抬到遮罩之上，遮罩就只剩数据区可见。
+   仅当遮罩存在时生效（:has）；Element Plus 在 loading=false 时会把遮罩元素从 DOM 中移除
+   （已实测，不会残留 display:none），所以 :has 不会长期命中。
+   骨架同时设 pointer-events:none —— 加载中依旧不可点击，与改动前"整张卡片被遮罩挡住"行为一致。
+   降级安全：不支持 :has 的浏览器会整段忽略，回退到原有表现，不会破坏布局。 */
+.page-card:has(> .el-loading-mask) > .el-loading-mask {
+  /* 遮罩原本 z-index:2000；卡片内除表格自身(z-index:1)外无更高层级，降到 10 安全 */
+  z-index: 10;
+}
+.page-card:has(> .el-loading-mask) .card-title,
+.page-card:has(> .el-loading-mask) .toolbar,
+.page-card:has(> .el-loading-mask) .el-tabs__header {
+  position: relative;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* 9. 弹窗居中：参照「侧边栏右侧的内容区」，且上下左右都居中
+   —— 现状：Element Plus 的弹窗遮罩层铺满整个窗口，弹窗在遮罩层里居中，参照的是「整个窗口」，
+      与侧边栏无关。实测窗口 1440 时弹窗中心 720，而内容区中心是 840（相差半个侧边栏宽）。
+      另外 el-dialog 默认 margin-top:15vh，纵向也不居中（实测 cy=320，目标 450）。
+      本节把参照框改成内容区，并让弹窗上下左右都居中。
+   —— 为何用 !important：实测 .el-overlay-message-box 的同名规则，无论是否加 body 前缀提高优先级
+      （三种选择器写法都试过）都会被 Element Plus 压回 padding:16px，只有 !important 稳定生效。
+   —— 覆盖范围：所有 el-dialog 与 ElMessageBox（含删除/冻结等确认框），无需改动业务代码。 */
+body .el-overlay-dialog {
+  display: flex !important; /* 配合下方 .el-dialog 的 margin:auto 实现纵向居中 */
+  padding-left: var(--libms-aside-w) !important; /* 横向让出侧边栏宽度 → 参照内容区 */
+  /* 上下各留 24px：弹窗比窗口高时（实测"新增图书"弹窗高 711px）auto 边距会归零、
+     弹窗会顶到窗口边缘；这两条padding 保证任何情况下都留出呼吸间距。
+     左右对称不影响水平居中，上下对称不影响垂直居中。 */
+  padding-top: 24px !important;
+  padding-bottom: 24px !important;
+}
+/* 这里用 margin:auto 而不是 align-items:center：弹窗高于窗口时 auto 边距可正常滚动，不会裁掉顶部 */
+body .el-dialog {
+  margin: auto !important;
+}
+body .el-overlay-message-box {
+  /* +16px 用于抵消 EP 自带的 padding:16px，否则中心会偏 8px */
+  padding-left: calc(var(--libms-aside-w) + 16px) !important;
+}
+
+/* 10. 轻量动效（2026-10-21 界面改造）
+   —— 刻意保持克制：只有「进入时淡入上浮」和「可点卡片悬停上浮」两类，单次 160~220ms，不拖沓。
+   —— 为什么不用 <transition> 包 router-view：本项目此前试过 fade+out-in，组件根节点带 v-loading 时
+      会干扰 transitionend 检测，导致切换后新组件不渲染、页面空白（Layout.vue 里有记录）。
+      这里改用 CSS 动画挂在内容区直接子元素上：路由切换时这些元素重新挂载，动画自然重放，
+      不依赖任何 JS 过渡钩子，零风险。 */
+@keyframes libmsPageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.layout-main > * {
+  animation: libmsPageIn 0.22s ease both;
+}
+/* 尊重系统「减少动态效果」偏好：关掉动画，避免眩晕 */
+@media (prefers-reduced-motion: reduce) {
+  .layout-main > * {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}

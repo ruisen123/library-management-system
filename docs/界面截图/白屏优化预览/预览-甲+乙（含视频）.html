@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>甲 + 乙 预览（含对照视频）</title>
+<style>
+  :root { --ink:#1f2733; --sub:#5b6675; --line:#e3e7ee; --bg:#f5f7fa; --blue:#2b6cb0; --green:#2f855a; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:26px 20px 56px; background:var(--bg); color:var(--ink);
+    font-family:'PingFang SC','Microsoft YaHei',Arial,sans-serif; font-size:14px; line-height:1.75; }
+  .wrap { max-width:1000px; margin:0 auto; }
+  h1 { font-size:21px; margin:0 0 6px; }
+  .sub { color:var(--sub); font-size:13px; margin-bottom:20px; }
+  h2 { font-size:16px; margin:28px 0 10px; padding-left:10px; border-left:3px solid var(--blue); }
+  .card { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-bottom:14px; }
+  .note { background:#fffdf5; border:1px solid #f0e0b8; border-left:4px solid #b7791f; }
+  video { width:100%; border:1px solid var(--line); border-radius:6px; display:block; background:#000; }
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .pair figure { margin:0; }
+  .pair img { width:100%; border:1px solid var(--line); border-radius:6px; display:block; }
+  .pair figcaption { font-size:12px; color:var(--sub); margin-top:6px; }
+  ul { margin:8px 0 0; padding-left:20px; } li { margin:4px 0; }
+  code { background:#eef2f7; padding:1px 5px; border-radius:4px; font-size:12.5px; }
+  .ok { color:var(--green); font-weight:600; }
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>甲 + 乙 预览（含对照视频）</h1>
+<div class="sub">LibMS · 2026-09-15 · 同一段菜单切换流程，上半段基线、下半段甲+乙</div>
+
+<div class="card note">
+  <b>为了看得清，视频里把接口延迟放大到了 1500ms</b>（实测真实只有约 55ms）。
+  不放大每秒只有 55ms，任何录屏都只能拍到一两帧、根本看不出差别。
+  右下角有文字标注当前是哪一段。真实时间数据见《预览-切换页面闪白.html》。
+</div>
+
+<h2>对照视频</h2>
+<div class="card">
+  <video src="甲+乙-对照预览.webm" poster="10_基线-遮罩盖住整张卡片.png" controls preload="metadata"></video>
+  <p style="font-size:12.5px;color:var(--sub);margin:10px 0 0">
+    若此处无法播放，可直接打开同目录的 <code>甲+乙-对照预览.webm</code> 文件。</p>
+</div>
+
+<h2>关键差异（静帧对照）</h2>
+<div class="card">
+  <div class="pair">
+    <figure>
+      <img src="10_基线-遮罩盖住整张卡片.png" alt="基线">
+      <figcaption>基线：遮罩盖住整张卡片 —— 标题、Tab、搜索框、按钮、表头全糊了</figcaption>
+    </figure>
+    <figure>
+      <img src="11_甲+乙-遮罩只盖表格区.png" alt="甲+乙">
+      <figcaption>甲+乙：标题、Tab、搜索框、按钮、表头<span class="ok">全部清晰</span>，只有表格数据区在转圈</figcaption>
+    </figure>
+  </div>
+</div>
+
+<h2>这两条分别做了什么</h2>
+<div class="card">
+  <ul>
+    <li><b>甲</b>：把 <code>v-loading</code> 从页面根节点<b>下移到数据区（el-table）</b>。
+    落地时是 15 个页面各挪一次指令位置；本预览为了不改源码，用运行时把遮罩裁剪到"从表格顶端开始"来等效模拟，
+    视觉结果与真正下移一致。</li>
+    <li><b>乙</b>：遮罩不透明度 0.9 → 0.5（让底下结构透出来）＋ 新内容 0.18s 淡入（把"啪一下弹出"变成"渐显"）。
+    注意：<b>光把遮罩改成灰色是没用的</b>（实测只差 2.24%），降不透明度才有效。</li>
+  </ul>
+</div>
+
+<h2>落地代价</h2>
+<div class="card">
+  <ul>
+    <li>甲：15 个 <code>.vue</code> 文件各改一处 —— <code>&lt;div v-loading="loading" class="page-card"&gt;</code>
+    里的 <code>v-loading</code> 移到内部表格上。</li>
+    <li>乙：<code>styles/index.css</code> 一条遮罩背景 + 一条 <code>@keyframes</code> 动画。</li>
+    <li>不碰 <code>&lt;transition&gt;</code>（本项目已有"页面空白"前科）、不上 keep-alive。</li>
+  </ul>
+</div>
+
+</div></body></html>

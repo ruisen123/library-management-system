@@ -1,0 +1,35 @@
+# ---- 依赖与构建产物（体积大、可重新生成）----
+node_modules/
+frontend/node_modules/
+test/browser/node_modules/
+backend/target/
+frontend/dist/
+*.class
+*.jar
+
+# ---- AI 助手过程文件与备份（不属于交付代码）----
+.workbuddy/
+.dsh/
+.claude/
+.cursor/
+
+# ---- 运行时产物 ----
+upload/
+logs/
+*.log
+
+# ---- 编辑器与系统 ----
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# ---- 密钥与环境（绝不外发）----
+.env
+deploy/docker/.env
+deploy/.env
+
+# ---- 论文与审查归档（给"看代码的人"的包里不需要；若对方是老师要看论文材料，把下面两行删掉）----
+thesis/
+审查归档/

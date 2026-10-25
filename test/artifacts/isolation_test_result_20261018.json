@@ -1,0 +1,27 @@
+{
+ "db": "_probe_iso_2d171261",
+ "mysql": "8.0",
+ "runs": [
+  {
+   "level": "REPEATABLE READ",
+   "reads": [
+    "t0=1",
+    "t1=1"
+   ],
+   "outside_after_commit": "2",
+   "err": "",
+   "same_within_tx": true
+  },
+  {
+   "level": "READ COMMITTED",
+   "reads": [
+    "t0=1",
+    "t1=2"
+   ],
+   "outside_after_commit": "2",
+   "err": "",
+   "same_within_tx": false
+  }
+ ],
+ "residual_dbs": ""
+}
