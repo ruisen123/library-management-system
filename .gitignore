@@ -7,6 +7,19 @@ frontend/dist/
 *.class
 *.jar
 
+# ---- Python 缓存（绝不能进仓库）----
+__pycache__/
+*.pyc
+*.pyo
+
+# ---- 测试临时产物 ----
+# 注意：test/artifacts 下的 .md 报告是交付证据（论文引用），必须保留；
+#       这里只排除同目录里测试运行时生成的 xlsx。
+test/artifacts/*.xlsx
+
+# ---- 过程材料（不是代码）----
+out/
+
 # ---- AI 助手过程文件与备份（不属于交付代码）----
 .workbuddy/
 .dsh/
