@@ -206,7 +206,7 @@ const menuTid = (path) => '[data-testid="menu-' + path.replace(/^\//, '') + '"]'
     const bad = [];
     for (const [p, expectPager] of g.pages) {
       const r = await fabOverlap(p, expectPager);
-      const inContent = !r.missing && r.x >= 64 && r.right <= r.vw && r.y + 52 <= r.vh;
+      const inContent = !r.missing && r.x >= 64 && r.right <= r.vw && r.y >= 0 && r.y + 52 <= r.vh;
       const pagerOk = !expectPager || r.pagerVisible === true;
       if (r.missing || r.hits.length > 0 || !inContent || !pagerOk) {
         bad.push(p + ' ' + (r.missing ? 'fab missing' : (r.hits.join(',') || 'pos=' + r.x + ',' + r.y) + ' pager=' + r.pagerVisible));
@@ -246,7 +246,7 @@ const menuTid = (path) => '[data-testid="menu-' + path.replace(/^\//, '') + '"]'
       return { hits, x: Math.round(f.left), right: Math.round(f.right), y: Math.round(f.top),
                vw: innerWidth, vh: innerHeight, asideW: aside ? Math.round(aside.getBoundingClientRect().width) : null };
     });
-    const inContent = !r.missing && r.x >= 64 && r.right <= r.vw && r.y + 52 <= r.vh;
+    const inContent = !r.missing && r.x >= 64 && r.right <= r.vw && r.y >= 0 && r.y + 52 <= r.vh;
     if (r.missing || r.hits.length > 0 || !inContent || r.asideW !== 64) {
       foldBad.push(p + ' ' + (r.missing ? 'fab missing' : (r.hits.join(',') || 'pos=' + r.x + ',' + r.y) + ' aside=' + r.asideW));
     }

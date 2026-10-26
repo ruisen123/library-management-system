@@ -16,9 +16,9 @@ RUN apt-get update \
     && useradd -r -u 1001 libms
 WORKDIR /app
 COPY --from=build /build/target/libms-backend-1.0.0.jar app.jar
-# logback 会把日志写到 LOG_PATH（默认工作目录下的 logs/）；非 root 用户在 /app 无写权限
-# 会让应用启动即失败，因此在切换用户前预建可写日志目录
-RUN mkdir -p /app/logs && chown -R libms:libms /app
+# 非 root 用户需要对日志与封面上传目录有写权限；upload 必须在镜像内预先存在，
+# 否则空命名卷挂到不存在的路径时会由 Docker 建成 root:root，导致首次上传失败
+RUN mkdir -p /app/logs /app/upload && chown -R libms:libms /app
 USER libms
 EXPOSE 8080
 ENV TZ=Asia/Shanghai

@@ -343,7 +343,7 @@ async function downloadTemplate() {
     const res = await downloadImportTemplate()
     saveBlobResponse(res, '图书导入模板.xlsx')
   } catch (e) {
-    // 拦截器已提示
+    msg.error((e && e.message) || '模板下载失败，请重试')
   }
 }
 

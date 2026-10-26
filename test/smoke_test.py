@@ -246,7 +246,11 @@ else:
     print("  [SKIP] 无未缴罚金，跳过缴纳用例")
 # 读者只能看自己罚金
 r = req("GET", "/fines", token=rt)
-check("读者查本人罚金 200", r["code"] == 200)
+fine_records = (r.get("data") or {}).get("records") or []
+# 种子 reader001 没有罚金记录；若接口忽略读者过滤返回他人罚金，这里会立刻变红
+check("读者查本人罚金 200 且仅本人（种子该读者为空）",
+      r["code"] == 200 and len(fine_records) == 0,
+      f"count={len(fine_records)} uids={set(f.get('userId') for f in fine_records)}")
 
 # ---------- 8. 统计 ----------
 print("\n[8] 统计接口")

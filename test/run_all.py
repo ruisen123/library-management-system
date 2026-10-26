@@ -77,6 +77,8 @@ BROWSER_SUITES = [
 # 统计占比基准）在 585 项内零保护，对应断言原本只在未注册的这两个脚本里。
 SPECIAL_SUITES = [
     ("fix_verify_20261023", "test/fix_verify_20261023.py", "py", 35),
+    # 2026-10-25 P1：封面接口独立专项（不计入 585 主口径）
+    ("cover_test", "test/cover_test.py", "py", 9),
     ("browser_fix_ui", "test/browser/fix_ui_20261023.js", "js", 9),
 ]
 
@@ -223,6 +225,10 @@ def run_suite(name, rel_path, kind, expect, root, need_reset=True):
     rec["seconds"] = round(time.time() - t0, 1)
     rec["passed"], rec["failed"] = parse_counts(name, out, rec["code"])
     rec["ok"] = (rec["code"] == 0)
+    # 2026-10-25（D-10）：失败行同样是硬门禁，防止 exit 0 + 期望通过数 + 中途 FAIL 被放过
+    if rec["ok"] and rec["failed"] not in (0, None):
+        rec["ok"] = False
+        rec["note"] = (rec["note"] + "；" if rec["note"] else "") + f"失败行 {rec['failed']} 条"
     non_empty = [ln for ln in out.splitlines() if ln.strip()]
     tail_lines = non_empty[-4:]
     # 失败明细必须留档：浏览器套件把 [FAIL] 打在输出中段，只存尾 4 行会导致

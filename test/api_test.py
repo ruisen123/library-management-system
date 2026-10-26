@@ -235,10 +235,14 @@ print("【性能测试】(接口响应时间)")
 # M-10：阈值 1000ms——第十五轮实测登录 P99 已 498ms，500ms 阈值贴线易受环境抖动假失败（见 docs/33）
 for i in range(5):
     c, b, t = req("POST", "/auth/login", {"username": "admin", "password": "123456"})
-    results.append(("PF-01", "登录接口响应(第%d次)" % (i + 1), "<1000ms", "%.1fms" % t, "PASS" if t < 1000 else "FAIL", ""))
+    dj = j(b)
+    ok = t < 1000 and c == 200 and isinstance(dj, dict) and dj.get("code") == 200
+    results.append(("PF-01", "登录接口响应(第%d次)" % (i + 1), "<1000ms", "%.1fms" % t, "PASS" if ok else "FAIL", ""))
 for i in range(5):
     c, b, t = req("GET", "/users?page=1&size=10", token=admin_token)
-    results.append(("PF-02", "用户列表接口响应(第%d次)" % (i + 1), "<1000ms", "%.1fms" % t, "PASS" if t < 1000 else "FAIL", ""))
+    dj = j(b)
+    ok = t < 1000 and c == 200 and isinstance(dj, dict) and dj.get("code") == 200
+    results.append(("PF-02", "用户列表接口响应(第%d次)" % (i + 1), "<1000ms", "%.1fms" % t, "PASS" if ok else "FAIL", ""))
 
 print("=" * 70)
 total = len(results)

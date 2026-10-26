@@ -252,7 +252,10 @@ print("\n[6] 净零副作用")
 check("6.1 通知不影响业务表不变量（借阅流水仍 8 条）",
       db_one("SELECT COUNT(*) FROM borrow_record;") == "8",
       f"cnt={db_one('SELECT COUNT(*) FROM borrow_record;')}")
-check("6.2 种子已恢复", reset_seed(), "")
+check("6.2 种子已恢复（日志 3 行、图书 6 册）",
+      reset_seed() and db_one("SELECT COUNT(*) FROM operation_log;") == "3"
+      and db_one("SELECT COUNT(*) FROM book;") == "6",
+      f"logs={db_one('SELECT COUNT(*) FROM operation_log;')} books={db_one('SELECT COUNT(*) FROM book;')}")
 check("6.3 恢复后通知表归零", db_one("SELECT COUNT(*) FROM notification;") == "0", "")
 
 print("\n" + "=" * 72)

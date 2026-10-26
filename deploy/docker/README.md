@@ -1,3 +1,5 @@
+> **交付安全（2026-10-25）**：`deploy/docker/.env` 已移出交付目录（备份在 `.workbuddy/backup/2026-10-25-P1修复二轮/docker.env`），**运行前必须 `cp .env.example .env` 并填入真实口令**。不要把备份里的 `.env` 再拷回交付包。
+
 # LibMS 容器化部署（deploy/docker）
 
 一条命令拉起 MySQL + 后端 + 前端，用于换机演示与答辩现场快速起服务。
@@ -13,7 +15,7 @@
 cd deploy/docker
 cp .env.example .env      # 填 MYSQL_ROOT_PASSWORD / MYSQL_PASSWORD / JWT_SECRET
 docker compose up -d --build
-# 打开 http://localhost:8088  登录 admin / 123456
+# 打开 http://localhost:9088（本机 .env 为 9088；默认 8088）  登录 admin / 123456
 ```
 
 常用命令：
@@ -29,7 +31,7 @@ docker compose down -v           # 停止并清空数据卷（下次 up 重新�
 
 | 服务 | 宿主端口 | 说明 |
 |---|---|---|
-| frontend | `${WEB_PORT:-8088}` → 80 | 唯一对外入口，`/api/**` 由容器内 Nginx 反代后端 |
+| frontend | `${WEB_PORT:-8088}` → 80（本机 `.env` 为 9088） | 唯一对外入口，`/api/**` 由容器内 Nginx 反代后端 |
 | backend | 不映射 | 仅容器网络内 `backend:8080` |
 | mysql | 不映射 | 仅容器网络内 `mysql:3306` |
 
@@ -52,6 +54,10 @@ docker compose down -v           # 停止并清空数据卷（下次 up 重新�
 - MySQL 官方镜像只在**空数据卷**首次启动时执行 `/docker-entrypoint-initdb.d/01-init.sql`
   （挂载的是仓库里的 `docs/04_数据库设计.sql`：建库 + 10 张表 + 19 个 CHECK + 种子数据）。
 - 想回到干净演示态：`docker compose down -v && docker compose up -d`。
+- 封面上传目录由镜像预建为 `libms` 可写，并挂载 `backend-upload` 卷；全新部署无需手工建目录。
+  若复用本修复前创建的旧卷且上传报“封面保存失败”，先修正卷属主再启动：
+  `docker compose run --rm --no-deps --user root --entrypoint sh backend -c "mkdir -p /app/upload && chown -R 1001:1001 /app/upload"`。
+- 2026-10-26 补测：生产构建的演示快捷登录按钮为 0；经容器 Nginx 完成“登录 → 上传封面 → 保存 → `/upload/**` 列表显示”全链路（图片真实解码、直链 200、控制台 0 错误），证据 `test/artifacts/cover_ui_container_20261026.md`。
 
 ## 与本机直跑方式的关系
 

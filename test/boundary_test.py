@@ -141,11 +141,10 @@ check("2.3 LIKE 通配符按字面量处理（% 不全表命中）",
 _, b = req("POST", "/auth/login", body={"username": "admin", "password": "123456"},
            headers={"X-Forwarded-For": "10.0.0.1, " * 30})
 check("2.4 超长 X-Forwarded-For 登录成功（不炸库）", b.get("code") == 200, str(b.get("msg"))[:40])
-ip_len = db_one("SELECT LENGTH(ip) FROM operation_log WHERE operation='LOGIN' ORDER BY id DESC LIMIT 1;")
-if ip_len is None:
-    print("  [SKIP] mysql 不可用，跳过 ip 收敛断言")
-else:
-    check("2.5 日志 ip 已收敛（长度 ≤ 50 列宽）", 0 < int(ip_len) <= 50, f"len={ip_len}")
+ip_row = db_one("SELECT ip FROM operation_log WHERE operation='LOGIN' ORDER BY id DESC LIMIT 1;")
+check("2.5 本次超长 XFF 登录已留痕且 IP 未被采信（长度 ≤ 50 列宽）",
+      ip_row is not None and ip_row != "" and not ip_row.startswith("10.0.0.1") and len(ip_row) <= 50,
+      f"ip={ip_row}")
 
 # ============ [3] 异常 token ============
 print("\n[3] 异常 token")

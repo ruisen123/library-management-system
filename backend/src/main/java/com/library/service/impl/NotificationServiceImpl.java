@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -73,6 +74,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final OperationLogService operationLogService;
     private final NotificationEmailService emailService;
     private final NotificationProperties properties;
+    private final TransactionTemplate transactionTemplate;
 
     /** 扫描互斥：定时任务与手动触发并发时只跑一轮（dedup 本身也幂等，这里只是省资源） */
     private final AtomicBoolean scanning = new AtomicBoolean(false);
@@ -181,8 +183,12 @@ public class NotificationServiceImpl implements NotificationService {
             return vo;
         }
         try {
-            vo.setCreated(generateReminders());
-            vo.setPurged(purgeOldRead());
+            // 生成与清理各用独立事务，避免同类自调用导致 @Transactional 失效；
+            // 邮件网络 I/O 不放在事务内。
+            Integer created = transactionTemplate.execute(status -> generateReminders());
+            Integer purged = transactionTemplate.execute(status -> purgeOldRead());
+            vo.setCreated(created == null ? 0 : created);
+            vo.setPurged(purged == null ? 0 : purged);
             EmailDispatchVO mail = emailService.dispatch();
             vo.setEmailed(mail.getSent());
             vo.setFailed(mail.getFailed());

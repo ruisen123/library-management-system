@@ -81,7 +81,7 @@ public class ReservationController {
     @Operation(summary = "手动回收已过期待取预约（幂等，供运维/演示）")
     public Result<Integer> expire() {
         int count = reservationService.expireOverdue();
-        operationLogService.record("RESERVE_EXPIRE", "手动回收过期预约 " + count + " 条");
+        operationLogService.recordBestEffort(UserContext.getUserId(), "RESERVE_EXPIRE", "手动回收过期预约 " + count + " 条");
         return Result.ok("已回收过期预约 " + count + " 条", count);
     }
 }

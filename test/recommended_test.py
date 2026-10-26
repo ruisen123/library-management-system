@@ -333,7 +333,9 @@ if cc:
     t2 = threading.Thread(target=worker, args=(2,))
     t1.start(); t2.start(); t1.join(); t2.join()
     ok = sum(1 for v in results.values() if v.get("code") == 200)
-    check("4.23 双线程抢最后 1 个额度仅 1 单成功", ok == 1, f"ok={ok} detail={results}")
+    rejected = sum(1 for v in results.values() if v.get("code") != 200)
+    check("4.23 双线程抢最后 1 个额度仅 1 单成功", ok == 1 and rejected == 1,
+          f"ok={ok} rejected={rejected} detail={results}")
     cc = find_user("qconc" + suffix)
     check("4.24 并发后在借数=1（未突破读者级额度）",
           cc.get("borrowedCount") == 1, f"borrowed={cc.get('borrowedCount')}")

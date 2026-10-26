@@ -36,8 +36,10 @@ chmod 600 "$CRED_FILE"
 # ---- 执行备份（带日期时间戳，避免同日覆盖）----
 TIMESTAMP=$(date +%F_%H%M%S)
 OUT_FILE="$BACKUP_DIR/library_${TIMESTAMP}.sql"
+# --databases 让 dump 自带 CREATE DATABASE IF NOT EXISTS 与 USE：
+# 目标库被删或换机后可直接恢复，不被"必须先手工建库"卡住
 if mysqldump --defaults-extra-file="$CRED_FILE" \
-    -h"$DB_HOST" -P"$DB_PORT" --single-transaction --set-gtid-purged=OFF "$DB_NAME" > "$OUT_FILE" 2> "$BACKUP_DIR/backup.err"; then
+    -h"$DB_HOST" -P"$DB_PORT" --single-transaction --set-gtid-purged=OFF --databases "$DB_NAME" > "$OUT_FILE" 2> "$BACKUP_DIR/backup.err"; then
   chmod 600 "$OUT_FILE"
   echo "✅ 备份成功：$OUT_FILE（$(du -h "$OUT_FILE" | cut -f1)）"
   rm -f "$BACKUP_DIR/backup.err" "$CRED_FILE"

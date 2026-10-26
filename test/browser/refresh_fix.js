@@ -67,7 +67,7 @@ const pass = (name, cond, detail = '') => {
   // 【边界 3】开放重定向：伪造 //evil.com → 不得跳外链
   await page.goto(BASE + '/login?redirect=//evil.com', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1000);
-  pass('C6 redirect=//evil.com 不跳外链', !page.url().includes('evil.com'), page.url());
+  pass('C6 redirect=//evil.com 回角色首页且不跳外链', page.url().includes('/book-search') && !page.url().includes('evil.com'), page.url());
 
   // 【边界 4】不可解析路径：/login?redirect=/nope-404 → 回角色首页而非空白
   await page.goto(BASE + '/login?redirect=/nope-404', { waitUntil: 'domcontentloaded' });

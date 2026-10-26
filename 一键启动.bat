@@ -117,7 +117,7 @@ echo.
 echo ============================================================
 echo   启动完成
 echo     - 前端页面： http://localhost:5173
-echo     - 后端接口： http://localhost:8080/doc.html
+echo     - 后端服务： http://localhost:8080 （接口文档默认关闭，调试需显式开启）
 echo     - 演示账号： admin / librarian01 / reader001（密码 123456）
 echo     - 若页面提示网络异常：后端可能还在启动，稍等十几秒刷新即可
 echo     - 关闭系统：关闭上述两个程序窗口即可
@@ -139,7 +139,7 @@ set TRIES=0
 set /a TRIES+=1
 if %TRIES% gtr 20 goto wb_fail
 timeout /t 2 /nobreak >nul
-curl -s -f -m 3 --noproxy "*" -o nul http://localhost:8080/doc.html
+curl -s -f -m 3 --noproxy "*" -o nul http://localhost:8080/books
 if not errorlevel 1 goto wb_ok
 if %TRIES% lss 20 echo        等待中（%TRIES%/20）...
 goto wb_loop
@@ -147,7 +147,7 @@ goto wb_loop
 echo        [提示] 后端暂未就绪。请看后端窗口是否有报错；若正在启动，稍等后刷新网页即可。
 goto :eof
 :wb_ok
-echo        后端已就绪（http://localhost:8080/doc.html）。
+echo        后端已就绪（http://localhost:8080/books）。
 goto :eof
 
 REM ========== 子程序：等待前端就绪 ==========

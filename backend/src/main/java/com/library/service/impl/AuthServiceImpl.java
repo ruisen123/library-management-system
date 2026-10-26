@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AuthServiceImpl implements AuthService {
 
     /**
-     * 登录防爆破：登录名 → [失败次数, 首次失败时间戳(ms)]，10 分钟窗口内失败 5 次则临时锁定 10 分钟。
+     * 登录防爆破：登录名 → [失败次数, 最近失败时间戳(ms), 锁定截止时间戳(ms)]，10 分钟窗口内失败 5 次后，自第 5 次失败起锁定 10 分钟。
      * 说明：计数保存在进程内存（ConcurrentHashMap），随进程重启清零、多实例部署时各实例独立计数；
      *      本项目为单实例部署（见 deploy/部署说明.md），该实现满足需求，无需引入 Redis 等外部存储。
      *      ConcurrentHashMap.compute 保证同一登录名的计数原子，避免并发下计数丢失。
@@ -66,8 +66,7 @@ public class AuthServiceImpl implements AuthService {
         String loginName = dto.getUsername() == null ? "" : dto.getUsername().trim();
         String loginKey = loginName.toLowerCase(Locale.ROOT);
         long[] fails = LOGIN_FAILS.get(loginKey);
-        boolean locked = fails != null && fails[0] >= MAX_FAILS
-                && System.currentTimeMillis() - fails[1] <= WINDOW_MS;
+        boolean locked = fails != null && fails[2] > System.currentTimeMillis();
         // 按登录名查询用户
         SysUser user = sysUserMapper.selectOne(
                 new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, loginName)
@@ -91,18 +90,19 @@ public class AuthServiceImpl implements AuthService {
             // 失败计数（滑动窗口：超窗则重置后重新计数）
             LOGIN_FAILS.compute(loginKey, (k, v) -> {
                 long now = System.currentTimeMillis();
-                long[] cur = (v == null || now - v[1] > WINDOW_MS) ? new long[]{0, now} : v;
+                long[] cur = (v == null || now - v[1] > WINDOW_MS) ? new long[]{0, now, 0} : v;
                 cur[0]++;
+                if (cur[0] >= MAX_FAILS) {
+                    // 从第 5 次失败起再锁 10 分钟；不再用首次失败时间充当锁到期时间
+                    cur[2] = now + WINDOW_MS;
+                }
                 return cur;
             });
-            // 容量兜底：先清除已过窗口的计数；若仍超阈值（短时间内大量不同账号失败，无过期项可清），
-            // 则整体清空，保证 Map 条目数有确定上界，避免被爆破大量账号时内存无界增长
+            // 容量兜底：只清除已过期条目，绝不清空正在锁定的账号（避免灌入大量用户名绕过锁定）。
+            // 锁到期时间字段为 0 表示未锁定；超过 1 万条时仅清掉未锁定且已过期条目。
             if (LOGIN_FAILS.size() > 10000) {
                 long now = System.currentTimeMillis();
-                LOGIN_FAILS.entrySet().removeIf(e -> now - e.getValue()[1] > WINDOW_MS);
-                if (LOGIN_FAILS.size() > 10000) {
-                    LOGIN_FAILS.clear();
-                }
+                LOGIN_FAILS.entrySet().removeIf(e -> e.getValue()[2] <= now);
             }
             // 审计留痕：失败登录此前完全无痕，暴力破解不可观测（user_id 置 null：登录名可能不存在）
             // 注意：登录名已被 @Size(max=30) 收敛，detail 长度有界

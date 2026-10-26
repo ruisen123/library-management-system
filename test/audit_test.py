@@ -239,7 +239,8 @@ try:
     rep4 = (req("POST", "/audit/run", at).get("data") or {})
     r1b = next((i for i in (rep4.get("items") or []) if i.get("ruleId") == "R1"), {})
     check("注入 5 行异常被全部计数", r1b.get("count") == 5, r1b.get("count"))
-    check("定位样本限流 ≤ 5 条", len(r1b.get("samples") or []) <= 5, len(r1b.get("samples") or []))
+    samples = r1b.get("samples") or []
+    check("定位样本 = 5 条且覆盖全部注入行", len(samples) == 5 and set(samples) == {f"bookId={i}" for i in (1, 2, 4, 5, 6)}, samples)
     db_exec("UPDATE book SET stock=stock+1 WHERE id IN (1,2,4,5,6);")
     injected_ids.difference_update({1, 2, 4, 5, 6})
 

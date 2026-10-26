@@ -239,7 +239,7 @@ async function doExport() {
     saveBlobResponse(res, 'LibMS_报表.xlsx')
     msg.success('报表已开始下载')
   } catch (e) {
-    // 拦截器已提示
+    msg.error((e && e.message) || '导出失败，请重试')
   } finally {
     exporting.value = false
   }

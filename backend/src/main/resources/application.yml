@@ -90,10 +90,10 @@ jwt:
 # 此时可设 APP_TRUST_FORWARDED_HEADER=true 取真实客户端 IP（兼容旧变量名 TRUST_FORWARDED_HEADER）。
 app:
   trust-forwarded-header: ${APP_TRUST_FORWARDED_HEADER:${TRUST_FORWARDED_HEADER:false}}
-  # 接口文档面（/doc.html、/v3/api-docs）：本地开发默认开启，容器/生产建议 false。
+  # 接口文档面（/doc.html、/v3/api-docs）：默认关闭，仅开发调试时显式设 true 开启。
   # knife4j/springdoc 自身的开关无法关闭静态资源面（见文件末尾实测说明），故由 ApiDocsAccessFilter 兜底。
   api-docs:
-    enabled: ${APP_API_DOCS_ENABLED:true}
+    enabled: ${APP_API_DOCS_ENABLED:false}
   # 读者自助注册限流（进程内滑动窗口；单实例部署，与登录防爆破同口径）
   register:
     max-per-ip: ${APP_REGISTER_MAX_PER_IP:5}          # 单 IP 窗口内最多注册次数

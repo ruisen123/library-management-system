@@ -131,7 +131,7 @@ for name, m, p, tk, raw in cases:
     _c, b = req(m, p, tk, raw=raw)
     msg = str(b.get("msg", ""))
     leaked = [w for w in LEAK if w in msg]
-    check(name, not leaked, f"msg={msg[:60]!r} 泄露={leaked}")
+    check(name, (_c != 200 or b.get("code") != 200) and not leaked, f"msg={msg[:60]!r} 泄露={leaked} code={b.get('code')}")
 
 none_token = (base64.urlsafe_b64encode(b'{"alg":"none"}').rstrip(b"=").decode()
               + "." + base64.urlsafe_b64encode(b'{"sub":"1","role":"ADMIN"}').rstrip(b"=").decode() + ".")

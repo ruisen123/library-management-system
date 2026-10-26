@@ -319,7 +319,9 @@ async function loadMySummary() {
   try {
     const res = await listMyBorrows({ page: 1, size: 100, status: 1 })
     const recs = (res.data && res.data.records) || []
-    onBorrow.value = Number((res.data && res.data.total) || 0)
+    const total = Number((res.data && res.data.total) || 0)
+    onBorrow.value = total
+    if (total > recs.length) msg.warning('在借记录超过 100 条，摘要仅统计前 100 条')
     const today = new Date(todayStr())
     dueSoon.value = recs.filter((r) => {
       const days = Math.floor((new Date(r.dueDate) - today) / 86400000)
@@ -364,6 +366,9 @@ async function loadMyReservations() {
   try {
     const res = await listMyReservations({ page: 1, size: 50 })
     const recs = (res.data && res.data.records) || []
+    if (Number((res.data && res.data.total) || 0) > recs.length) {
+      msg.warning('预约记录超过 50 条，仅加载前 50 条')
+    }
     const map = {}
     for (const r of recs) {
       // 只认"仍有效"的预约；已完成 / 已取消 / 已过期的不再显示取消按钮
