@@ -46,8 +46,15 @@ ARTIFACTS_DIR = os.path.join(PROJECT_ROOT, "test", "artifacts")
 
 
 def _find(candidates):
-    """返回第一个可执行候选（绝对路径存在，或裸命令名交给系统解析）；找不到返回 None。"""
+    """返回第一个可执行候选（绝对路径存在，或裸命令名交给系统解析）；找不到返回 None。
+
+    2026-10-28（CI 跨平台修正）：非 Windows 平台上，Windows 风格路径（含盘符或反斜杠）
+    不是"裸命令名"——os.path.isabs 在 Linux 对 Windows 盘符路径返回 False，修复前会被原样
+    当作命令名交给 subprocess，表现为 No such file or directory。故先按平台过滤。
+    """
     for c in candidates:
+        if os.name != "nt" and (":" in c or "\\" in c):
+            continue
         if os.path.isabs(c):
             if os.path.isfile(c):
                 return c
