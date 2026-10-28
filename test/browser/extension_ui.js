@@ -137,7 +137,8 @@ const menuTid = (path) => '[data-testid="menu-' + path.replace(/^\//, '') + '"]'
   // ===== 馆员：批量导入弹窗 + 模板下载 =====
   await login('librarian01');
   await page.locator(menuTid('/book-manage')).first().click().catch(() => {});
-  await page.waitForTimeout(1000);
+  // 2026-10-28（CI）：同上，改等真实条件而非固定 sleep
+  await page.waitForSelector('[data-testid="book-import-open"]', { timeout: 15000 }).catch(() => {});
   pass('L1 图书管理显示批量导入入口',
     (await page.locator('[data-testid="book-import-open"]').count()) === 1);
   await page.click('[data-testid="book-import-open"]');
