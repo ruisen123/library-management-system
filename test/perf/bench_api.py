@@ -94,7 +94,7 @@ SCEN = [
     ("用户列表分页",         "GET", "/users?page=1&size=10", None, "常规", "ADMIN"),
     ("月度借阅趋势聚合",      "GET", "/stats/trend", None, "万级", "ADMIN"),
     ("借阅热度排行（TOP10）", "GET", "/stats/top", None, "万级", "ADMIN"),
-    ("用户角色/状态筛选",     "GET", "/users?page=1&size=10&role=READER", None, "万级", "ADMIN"),
+    ("用户角色/状态筛选",     "GET", "/users?page=1&size=10&role=READER", None, "常规", "ADMIN"),
     ("在借记录查询",         "GET", "/borrow-records?page=1&size=10", None, "万级", "LIBRARIAN"),
     ("图书关键词（中缀）检索", "GET", "/books?page=1&size=10&keyword=性能测试", None, "万级", "LIBRARIAN"),
 ]

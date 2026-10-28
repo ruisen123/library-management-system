@@ -54,7 +54,7 @@ for r in record['runs']:
     r['same_within_tx'] = same
     print('  %-16s %s -> %s' % (r['level'], r['reads'], '两次相同（快照读）' if same else '两次不同（读到新提交）'))
 
-out = r"C:\Users\23754\dsh-probe\out\isolation_test_result.json"
+out = r"C:\Users\<你的用户名>\dsh-probe\out\isolation_test_result.json"
 with open(out, 'w', encoding='utf-8') as f:
     json.dump(record, f, ensure_ascii=False, indent=1)
 print('\n结果已存: %s' % out)

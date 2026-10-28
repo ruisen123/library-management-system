@@ -2,7 +2,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 const BASE = 'http://localhost:5173';
-const OUT = 'C:\\Users\\23754\\Desktop\\软件\\SpringBoot Vue library\\docs\\界面截图\\修复后（当前版本）';
+const OUT = 'C:\\Users\\<你的用户名>\\Desktop\\软件\\SpringBoot Vue library\\docs\\界面截图\\修复后（当前版本）';
 fs.mkdirSync(OUT, { recursive: true });
 
 const GROUPS = [

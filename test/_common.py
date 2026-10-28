@@ -24,14 +24,14 @@ DB_PWD = os.environ.get("LIBMS_DB_PWD", "123456")  # 可用环境变量覆盖（
 
 MYSQL_CANDIDATES = ("mysql", r"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe")
 NODE_CANDIDATES = (
-    r"C:\Users\23754\.workbuddy\binaries\node\versions\22.22.2-3\node.exe",
+    r"C:\Users\<你的用户名>\.workbuddy\binaries\node\versions\22.22.2-3\node.exe",
     r"C:\Program Files\nodejs\node.exe",
     "node",
 )
 # playwright 依赖目录候选（浏览器套件 require('playwright') 经 NODE_PATH 解析）
 PLAYWRIGHT_NM_CANDIDATES = (
     os.path.join(PROJECT_ROOT, "test", "browser", "node_modules"),   # 固化位置（playwright@1.62）
-    os.path.join(os.environ.get("TEMP", r"C:\Users\23754\AppData\Local\Temp"), "pwcheck", "node_modules"),  # 历史路径，仅兜底
+    os.path.join(os.environ.get("TEMP", r"C:\Users\<你的用户名>\AppData\Local\Temp"), "pwcheck", "node_modules"),  # 历史路径，仅兜底
 )
 
 # 种子基线（docs/04 导入后的 10 表计数；供套件与运行器校验）
