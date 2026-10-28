@@ -40,6 +40,8 @@ jobs:
 
   regression:
     name: 全量回归（585 项）
+    # Dependabot 的依赖升级 PR 只跑构建与单测，不跑 585 项回归（节省 Actions 时间）
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     services:
