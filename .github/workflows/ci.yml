@@ -14,32 +14,119 @@ jobs:
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-
       - name: 安装 JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
           cache: maven
-
       - name: 安装 Node 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-
       - name: 后端编译打包
         working-directory: backend
         run: mvn -B -DskipTests package
-
       - name: 前端依赖安装
         working-directory: frontend
         run: npm ci || npm install
-
       - name: 前端构建
         working-directory: frontend
         run: npm run build
-
       - name: 结构断言（README 数字与代码一致）
         run: python3 test/ci_structure_check.py
+
+  regression:
+    name: 全量回归（585 项）
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: '123456'
+          MYSQL_DATABASE: library_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd=mysqladmin ping -h 127.0.0.1 -uroot -p123456 --silent
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    env:
+      LIBMS_DB_HOST: 127.0.0.1
+      LIBMS_DB_PORT: '3306'
+      LIBMS_DB_PWD: '123456'
+      PYTHONIOENCODING: utf-8
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      - name: 安装 JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: 安装 Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 安装 MySQL 客户端
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+      - name: 后端编译打包
+        working-directory: backend
+        run: mvn -B -DskipTests package
+      - name: 启动后端并等待就绪
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_USERNAME: root
+          DB_PASSWORD: '123456'
+          JWT_SECRET: LibMS-CI-SecretKey-OnlyForTest-0123456789abcdef
+        run: |
+          nohup java -jar backend/target/libms-backend-1.0.0.jar --server.port=8080 > backend.log 2>&1 &
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/books || true)
+            if [ "$code" = "200" ]; then echo "backend ready after ${i} tries"; break; fi
+            sleep 2
+          done
+          curl -s -o /dev/null -w 'backend_ready_code=%{http_code}' http://127.0.0.1:8080/books
+          echo ""
+      - name: 安装前端依赖
+        working-directory: frontend
+        run: npm ci || npm install
+      - name: 启动前端 dev server 并等待就绪
+        working-directory: frontend
+        run: |
+          nohup node node_modules/vite/bin/vite.js --port 5173 --strictPort > ../vite.log 2>&1 &
+          for i in $(seq 1 45); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/ || true)
+            if [ "$code" = "200" ]; then echo "frontend ready after ${i} tries"; break; fi
+            sleep 2
+          done
+          curl -s -o /dev/null -w 'frontend_ready_code=%{http_code}' http://127.0.0.1:5173/
+          echo ""
+      - name: 安装 Playwright 与浏览器
+        working-directory: test/browser
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+      - name: 运行全量回归
+        run: python3 test/run_all.py --browser
+      - name: 上传测试报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-reports
+          path: test/artifacts/*.md
+          if-no-files-found: ignore
+      - name: 失败时输出服务日志
+        if: failure()
+        run: |
+          echo '===== backend.log ====='
+          tail -60 backend.log || true
+          echo '===== vite.log ====='
+          tail -40 vite.log || true
