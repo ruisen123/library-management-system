@@ -56,7 +56,9 @@ const menuTid = (path) => '[data-testid="menu-' + path.replace(/^\//, '') + '"]'
 
   // 3. 我的借阅四 Tab（预约页签为 2026-10-22 新增）
   await page.locator(menuTid('/my-borrow')).first().click().catch(() => {});
-  await page.waitForTimeout(1200);
+  // 2026-10-28（CI）：Linux runner 上 vite dev 首次访问该路由要按需编译，固定 sleep 会在
+  // tab 渲染前取值（表现为 tabs 为空、断言 detail 为空串）。改为等真实条件。
+  await page.waitForSelector('[data-testid="myborrow-tabs"] .el-tabs__item', { timeout: 15000 }).catch(() => {});
   const tabs = await page.locator('[data-testid="myborrow-tabs"] .el-tabs__item').allTextContents();
   const expectedTabs = ['在借', '预约', '历史', '罚金'];
   pass('R3 我的借阅四Tab', expectedTabs.every((x) => tabs.some((t) => t.includes(x))), tabs.join(','));
