@@ -120,9 +120,12 @@ python test/run_all.py --browser
 
 > 测试会重建 `library_db`（清空后重新导入种子），不是隔离临时库。跑之前请备份非种子数据。
 
-**CI 覆盖范围**：`.github/workflows/ci.yml` 在每次 push 时执行后端编译打包、前端构建，以及 `test/ci_structure_check.py` 的结构断言——把本文档里的 15 / 59 / 17 / 10 四个数字与代码绑定，任一处对不上就失败。
+**CI 覆盖范围**（`.github/workflows/ci.yml`，每次 push 触发）：
 
-全量 585 项回归需要本机 MySQL 与 Playwright，CI 暂未覆盖，以 `test/artifacts/` 的历史报告为准。
+- `构建与结构断言`：后端编译打包、前端构建，以及 `test/ci_structure_check.py`——把本文档里的 15 / 59 / 17 / 10 四个数字与代码绑定，任一处对不上就失败
+- `全量回归（585 项）`：ubuntu runner 上起 MySQL 8.0 service、构建并启动后端 jar、起 vite dev server、安装 Playwright，跑 `test/run_all.py --browser`
+
+CI 实测结果：**19/19 套件、585 项断言、0 失败**（专项 53 项另计）。本机历史报告见 `test/artifacts/`。
 
 ## 开发过程
 

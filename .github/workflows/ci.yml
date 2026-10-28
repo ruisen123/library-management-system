@@ -42,7 +42,6 @@ jobs:
     name: 全量回归（585 项）
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    continue-on-error: true
     services:
       mysql:
         image: mysql:8.0
