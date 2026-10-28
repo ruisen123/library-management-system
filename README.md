@@ -97,6 +97,22 @@ npm run dev
 
 双击根目录的 `一键启动.bat`，脚本会设置本地演示口令并依次拉起后端与前端。
 
+## 容器镜像
+
+推送 `backend/` 或 `frontend/` 改动时，Actions 会自动构建并推送到 GitHub Container Registry：
+
+- `ghcr.io/ruisen123/library-management-system-backend:latest`
+- `ghcr.io/ruisen123/library-management-system-frontend:latest`
+
+包默认是私有的，拉取前先登录：
+
+```bash
+echo $GITHUB_TOKEN | docker login ghcr.io -u <你的GitHub账号> --password-stdin
+docker pull ghcr.io/ruisen123/library-management-system-backend:latest
+```
+
+> 想让别人匿名拉取，需要到 GitHub 的 Packages 设置里把这两个包改成 Public。
+
 ## 目录结构
 
 ```
