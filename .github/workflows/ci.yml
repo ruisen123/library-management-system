@@ -26,9 +26,9 @@ jobs:
           node-version: '20'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - name: 后端编译打包
+      - name: 后端单元测试并打包（JUnit 5）
         working-directory: backend
-        run: mvn -B -DskipTests package
+        run: mvn -B package
       - name: 前端依赖安装
         working-directory: frontend
         run: npm ci || npm install
