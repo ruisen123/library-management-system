@@ -52,7 +52,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd=mysqladmin ping -h 127.0.0.1 -uroot -p123456 --silent
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -p123456 --silent"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=12
@@ -79,6 +79,17 @@ jobs:
       - name: 后端编译打包
         working-directory: backend
         run: mvn -B -DskipTests package
+      - name: 验证 MySQL service 可连接
+        run: |
+          for i in $(seq 1 30); do
+            if mysql -h 127.0.0.1 -P 3306 -uroot -p123456 -e "SELECT VERSION();" 2>/dev/null; then
+              echo "mysql reachable after ${i} tries"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "mysql NOT reachable"
+          exit 1
       - name: 启动后端并等待就绪
         env:
           DB_HOST: 127.0.0.1
