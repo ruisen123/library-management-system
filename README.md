@@ -99,19 +99,19 @@ npm run dev
 
 ## 容器镜像
 
-推送 `backend/` 或 `frontend/` 改动时，Actions 会自动构建并推送到 GitHub Container Registry：
+推送 `backend/` 或 `frontend/` 改动时，Actions 会自动构建并推送到 GitHub Container Registry（已公开，无需登录即可拉取）：
 
 - `ghcr.io/ruisen123/library-management-system-backend:latest`
 - `ghcr.io/ruisen123/library-management-system-frontend:latest`
 
-包默认是私有的，拉取前先登录：
-
 ```bash
-echo $GITHUB_TOKEN | docker login ghcr.io -u <你的GitHub账号> --password-stdin
 docker pull ghcr.io/ruisen123/library-management-system-backend:latest
+docker pull ghcr.io/ruisen123/library-management-system-frontend:latest
 ```
 
-> 想让别人匿名拉取，需要到 GitHub 的 Packages 设置里把这两个包改成 Public。
+> 镜像按 `linux/amd64` 构建；ARM 设备（Apple Silicon、ARM 服务器）拉取时加 `--platform linux/amd64`。
+>
+> 这两个镜像**不能单独运行**——后端需要 MySQL，前端需要后端。要跑起完整系统仍用 `deploy/docker/docker-compose.yml`（MySQL + 后端 + Nginx 前端三个容器）；单拉镜像只适合排障或二次开发。
 
 ## 目录结构
 
