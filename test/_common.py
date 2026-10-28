@@ -21,6 +21,8 @@ SEED_SQL = os.path.join(PROJECT_ROOT, "docs", "04_数据库设计.sql")
 DB_NAME = "library_db"
 DB_USER = "root"
 DB_PWD = os.environ.get("LIBMS_DB_PWD", "123456")  # 可用环境变量覆盖（默认本地测试口令，见运行手册）
+DB_HOST = os.environ.get("LIBMS_DB_HOST", "").strip()  # 留空=沿用 mysql 客户端默认（本机 socket/localhost）
+DB_PORT = os.environ.get("LIBMS_DB_PORT", "").strip()  # 留空=默认 3306；CI 的 service 容器走 TCP 时需显式指定
 
 MYSQL_CANDIDATES = ("mysql", r"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe")
 NODE_CANDIDATES = (
@@ -58,6 +60,20 @@ def mysql_exe():
     return _find(MYSQL_CANDIDATES)
 
 
+def mysql_args(exe):
+    """mysql 客户端的公共参数：账号与口令，以及可选的远程主机/端口。
+
+    默认不带 -h/-P，保持本机原有行为（Windows 走 localhost、Linux 走 socket）；
+    在 CI 等场景下通过 LIBMS_DB_HOST / LIBMS_DB_PORT 指定 TCP 地址。
+    """
+    args = [exe, "-u" + DB_USER, "-p" + DB_PWD]
+    if DB_HOST:
+        args += ["-h", DB_HOST]
+    if DB_PORT:
+        args += ["-P", DB_PORT]
+    return args
+
+
 def node_exe():
     return _find(NODE_CANDIDATES)
 
@@ -75,7 +91,7 @@ def db_multi(sql):
     exe = mysql_exe()
     if exe is None:
         return None
-    cmd = [exe, "-u" + DB_USER, "-p" + DB_PWD, "-N", "-e", f"USE {DB_NAME}; " + sql]
+    cmd = mysql_args(exe) + ["-N", "-e", f"USE {DB_NAME}; " + sql]
     try:
         r = subprocess.run(cmd, capture_output=True, text=True,
                            encoding="utf-8", errors="replace", timeout=20)
@@ -99,14 +115,14 @@ def reset_seed():
     if not os.path.isfile(SEED_SQL):
         return False, f"种子文件不存在：{SEED_SQL}"
     try:
-        prep = subprocess.run([exe, "-u" + DB_USER, "-p" + DB_PWD, "--default-character-set=utf8mb4",
+        prep = subprocess.run(mysql_args(exe) + ["--default-character-set=utf8mb4",
                                "-e", f"DROP DATABASE IF EXISTS {DB_NAME}; "
                                      f"CREATE DATABASE {DB_NAME} DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"],
                               capture_output=True, timeout=60)
         if prep.returncode != 0:
             return False, "重建数据库失败：" + (prep.stderr or b"").decode("utf-8", "replace")[:200]
         with open(SEED_SQL, "rb") as f:
-            r = subprocess.run([exe, "-u" + DB_USER, "-p" + DB_PWD, "--default-character-set=utf8mb4", DB_NAME],
+            r = subprocess.run(mysql_args(exe) + ["--default-character-set=utf8mb4", DB_NAME],
                                stdin=f, capture_output=True, timeout=120)
         if r.returncode != 0:
             return False, "种子导入失败（退出码非 0）"
