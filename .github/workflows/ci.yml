@@ -60,6 +60,8 @@ jobs:
       LIBMS_DB_HOST: 127.0.0.1
       LIBMS_DB_PORT: '3306'
       LIBMS_DB_PWD: '123456'
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_TCP_PORT: '3306'
       PYTHONIOENCODING: utf-8
     steps:
       - name: 检出代码
@@ -90,6 +92,10 @@ jobs:
           done
           echo "mysql NOT reachable"
           exit 1
+      - name: 验证套件调用形式（不带 -h，依赖 MYSQL_HOST 环境变量）
+        run: |
+          mysql -uroot -p123456 -N -e "SELECT 'ENV_TCP_OK' AS marker, @@port AS port;"
+          echo "套件式调用（无 -h）通过，环境变量 MYSQL_HOST 生效"
       - name: 启动后端并等待就绪
         env:
           DB_HOST: 127.0.0.1
