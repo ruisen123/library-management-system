@@ -1,10 +1,23 @@
 # LibMS 图书借阅管理系统
 
-> 基于 Spring Boot 3 + Vue 3 的 B/S 图书借阅管理系统，面向中小型图书馆，设**系统管理员 / 图书管理员 / 读者**三类角色。
+> Spring Boot 3 + Vue 3 的 B/S 图书借阅管理系统，面向中小型图书馆，设 **系统管理员 / 图书管理员 / 读者** 三类角色。
 
-覆盖图书档案、读者账号、借还办理、预约排队、逾期罚金、数据统计与运行时数据一致性巡检，形成从档案管理到借还闭环的完整业务链路。
+[![CI](https://github.com/ruisen123/library-management-system/actions/workflows/ci.yml/badge.svg)](https://github.com/ruisen123/library-management-system/actions/workflows/ci.yml)
 
-![借还办理](docs/界面截图/2026-10-22_借还页改造/01_借书_初始.png)
+覆盖图书档案、读者账号、借还办理、预约排队、逾期罚金、数据统计与运行时数据一致性巡检，形成从档案管理到借还闭环的完整链路。
+
+![操作演示](docs/demo/demo.gif)
+
+> 完整演示（含登录，34 秒）：[docs/demo/demo.webm](docs/demo/demo.webm)
+
+## 和其他图书管理系统比，多了什么
+
+| 能力 | 做了什么 | 去哪儿核对 |
+|---|---|---|
+| **运行时数据一致性巡检** | 10 条规则 / 14 项检查，在同一个只读事务内比对库存、在借数、预约与业务记录，输出实际值、期望值与定位，只检测不自动改数据 | 上面演示的第二屏；`backend/src/main/java/com/library/audit/` |
+| **自动化回归 585 项** | 19 个套件覆盖接口、边界、安全、并发、巡检、E2E 与浏览器端，每轮落盘报告 | `test/`；`test/artifacts/` 132 份历史报告 |
+| **生成列唯一索引** | 用 STORED 生成列解决「逻辑删除后唯一约束仍然撞车」的问题，4 张表落地 | `docs/04_数据库设计.sql`（搜 `uk_isbn`） |
+| **密码指纹令牌失效** | 令牌里带密码摘要，改密后旧令牌立即失效，无需服务端会话表 | `AuthServiceImpl`、`JwtUtils`、`AuthInterceptor` |
 
 ## 功能特性
 
@@ -16,8 +29,7 @@
 | 预约排队 | 无可借副本时排队，到书通知，待取 7 天由定时任务回收，库存变动自动顺延队列 |
 | 站内通知与邮件 | 到书 / 到期 / 逾期 / 欠费 / 证件将到期提醒；通知表兼作邮件 outbox（认领式发送 + 指数退避重试） |
 | 数据统计 | 借阅趋势、分类分布、热门排行，多 sheet Excel 报表导出 |
-| 数据一致性巡检 | 10 条规则 / 14 项检查，运行时比对库存、在借数、预约与业务记录，定位到具体数据行；只检测与定位，不自动改数据 |
-| 权限与审计 | 令牌拦截 + 角色注解（未标注默认拒绝），写操作日志与业务同事务，密码变更后旧令牌立即失效 |
+| 权限与审计 | 令牌拦截 + 角色注解（未标注默认拒绝），写操作日志与业务同事务 |
 
 ## 技术栈
 
@@ -25,7 +37,7 @@
 |---|---|
 | 后端 | Java 21 · Spring Boot 3.2.5 · MyBatis-Plus 3.5.5 · JWT(jjwt 0.12.5) · EasyExcel · Maven |
 | 前端 | Vue 3.5 · Element Plus · Pinia · Vue Router 4 · ECharts · Vite 5 |
-| 数据库 | MySQL 8.0（10 张表 / 19 个 CHECK 约束，含生成列唯一索引处理逻辑删除与唯一约束的冲突） |
+| 数据库 | MySQL 8.0（10 张表 / 19 个 CHECK 约束） |
 | 部署 | Docker Compose（MySQL + 后端 + Nginx 前端，一条命令拉起） |
 
 规模：15 个控制器 / 59 个接口 / 17 个前端页面。
@@ -47,7 +59,7 @@ docker compose up -d --build
 
 ### 方式二：本地运行
 
-前置：JDK 21、Maven、Node.js 18+、MySQL 8.0（三者在同一台机器时按下面顺序启动）。
+前置：JDK 21、Maven、Node.js 18+、MySQL 8.0。
 
 **1) 导入数据库**（建库 + 10 张表 + 演示数据，脚本可重复执行）
 
@@ -90,9 +102,10 @@ npm run dev
 ```
 backend/    Spring Boot 后端（Java 21，Maven，controller/service/mapper/audit）
 frontend/   Vue 3 前端（Vite，views 下 17 个页面）
-docs/       数据库脚本、设计与联调文档、从零运行手册、界面截图
-test/       自动化回归（Python 黑盒接口/边界/安全套件 + Playwright 浏览器套件）
+docs/       数据库脚本、设计与联调文档、从零运行手册、界面截图、演示素材（demo/）
+test/       自动化回归（Python 黑盒套件 + Playwright 浏览器套件）与 CI 结构断言
 deploy/     部署脚本、SQL 迁移与 Docker Compose
+.github/    CI 工作流
 ```
 
 ## 测试
@@ -107,6 +120,18 @@ python test/run_all.py --browser
 
 > 测试会重建 `library_db`（清空后重新导入种子），不是隔离临时库。跑之前请备份非种子数据。
 
+**CI 覆盖范围**：`.github/workflows/ci.yml` 在每次 push 时执行后端编译打包、前端构建，以及 `test/ci_structure_check.py` 的结构断言——把本文档里的 15 / 59 / 17 / 10 四个数字与代码绑定，任一处对不上就失败。
+
+全量 585 项回归需要本机 MySQL 与 Playwright，CI 暂未覆盖，以 `test/artifacts/` 的历史报告为准。
+
+## 开发过程
+
+`test/artifacts/` 保留了 **132 份**按时间命名的历史报告（`audit_YYYYMMDD_HHMMSS.md`、`mail_*.md`），每份记录当轮的套件结果、断言数与失败明细。
+
+之所以有这么多份：每次改动后都跑一遍全量回归并把报告落盘，而不是攒到最后一次性验证。这些报告也可反向核对——某轮修了哪个缺陷、当时断言数是多少，都能在对应的报告里查到。
+
+本仓库只包含代码、文档与测试；论文与答辩材料不在此列。
+
 ## 文档
 
 - `docs/从零开始运行手册.md` —— 从安装 MySQL 到浏览器登录的完整步骤（0 基础可照抄）
@@ -119,3 +144,7 @@ python test/run_all.py --browser
 - 演示账号 `admin / 123456` 来自种子数据，正式使用前请修改。
 - 接口文档（Knife4j）默认关闭，需要时显式设置 `APP_API_DOCS_ENABLED=true`。
 - 邮件通道默认关闭（`MAIL_ENABLED=false`），关闭时站内通知照常工作。
+
+## 许可
+
+MIT，见 [LICENSE](LICENSE)。
