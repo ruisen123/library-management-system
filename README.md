@@ -205,6 +205,17 @@ CI 实测结果：**19/19 套件、585 项断言、0 失败**（专项 53 项另
 - 接口文档（Knife4j）默认关闭，需要时显式设置 `APP_API_DOCS_ENABLED=true`。
 - 邮件通道默认关闭（`MAIL_ENABLED=false`），关闭时站内通知照常工作。
 
+## 依赖安全说明
+
+仓库启用了 Dependabot。2026-10-31 对 14 条告警逐条核定并处置（全部 dismiss，理由与实测证据见
+`审查归档/02_已闭环问题清单/已闭环问题与代码证据.md` §二十）：
+
+- **vite / esbuild / postcss-selector-parser / brace-expansion**（11 条）：开发期构建工具（devDependencies）及其传递依赖，不进入 `vite build` 产物。
+- **follow-redirects**（2 条）：axios 的 Node 适配器传递依赖；浏览器构建使用 fetch/XHR 适配器，实测 `frontend/dist` 中该包代码 **0 处**（`maxRedirects` 仅为 axios 通用配置项名）。
+- **echarts 5.6.0**（1 条，medium）：唯一进入产物的依赖；图表配置全部硬编码于前端，不接受外部输入，计划答辩后升级 6.x。
+
+生产运行形态为 Docker Compose + Nginx 静态托管，**不启动 vite dev server**，上述开发期依赖的漏洞在交付形态下不可达。
+
 ## 许可
 
 MIT，见 [LICENSE](LICENSE)。
