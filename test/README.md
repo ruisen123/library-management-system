@@ -85,7 +85,7 @@ test/
 | 专项 | 2026-10-23 系统审查修复的关键行为（登录锁定放行 / 重复在借 / 库存联动顺延 / 统计同基准 / 预约资格 / 上传错误提示 / P0 还书不再空转）与修复 UI | `test/fix_verify_20261023.py` + `test/cover_test.py` + `test/browser/fix_ui_20261023.js` | 35 + 9 + 9（**run_all 单列，不计入 585**） |
 
 
-> 最新一次全量回归（2026-10-25 23:24）：`test/artifacts/audit_20261025_232448.md` —— 19/19 套件 · 585 项 · 0 SKIP · 专项 53/53；报告头新增「前端指纹」（frontend/src+package-lock.json+vite.config.js 树 sha256=`2bbb7078…`，Node v24.18.0），用于防止改了 .vue 却拿旧报告当证据。论文 6.2.2 与门禁 F-10 已同步指向该轮报告；23:24 全量已覆盖当前前端与测试脚本。
+> 最新一次全量回归（2026-10-25 23:24）：`test/artifacts/audit_20261025_232448.md` —— 19/19 套件 · 585 项 · 0 SKIP · 专项 53/53；报告头新增「前端指纹」（frontend/src+package-lock.json+vite.config.js 树 sha256=`2bbb7078…`，Node v24.18.0），用于防止改了 .vue 却拿旧报告当证据。门禁 F-10 已同步指向该轮报告；23:24 全量已覆盖当前前端与测试脚本。
 > 2026-10-25 测试脚本也做了加固（runner 失败行门禁、api_test 性能样本判状态、audit_test 样本=5、FAB 补 y≥0、C6 断言回角色首页）；这些改动与前端下载/找书页修复均已于 2026-10-25 23:24 全量通过（19/19、585/585、专项 53/53、0 SKIP）。
 **当前基线（2026-10-25 23:24 最新全量；现行证据 `test/artifacts/audit_20261025_232448.md`，0 SKIP，新 jar `0751e96d…`）：后端 511 项（119+55+33+5+31+22+25+9+29+26+32+30+40+36+19）+ 浏览器 74 项（25+8+21+20）= 585 项（19 个套件）**，另有邮件集成测试 14 项、专项 53 项（35+9+9）单独执行/单列；历史 581/485/477/387 见 `test/artifacts/`。
 
@@ -142,7 +142,7 @@ python test/run_all.py --list           # 查看套件清单与期望项数
 
 - `python test/perf/bench_audit_rules.py --dry-run` 只看计划；实跑需先设 `LIBMS_DB_PWD`，会创建并 DROP 探针库 `library_all14`。
 - `python test/perf/verify_audit_rules.py --dry-run` 看双向验证计划；实跑建/删探针库 `library_audit_probe2`，覆盖「14/14 检出、4/4 未误报」。
-- 用于复现论文 6.2.2 的「巡检 14 项检查：最慢 134 ms、串行合计约 1.06 s」（2026-10-20 复测，原始两次数据见 `test/artifacts/bench_audit_rules_20261020.md`）；最终代码 2026-10-24 复测 98 ms / 925 ms（`test/artifacts/bench_audit_rules_20261024.md`）；口径是规则 SQL 逐条耗时之和，不是 `/audit/run` 端到端时延。
+- 用于复现「巡检 14 项检查：最慢 134 ms、串行合计约 1.06 s」（2026-10-20 复测，原始两次数据见 `test/artifacts/bench_audit_rules_20261020.md`）；最终代码 2026-10-24 复测 98 ms / 925 ms（`test/artifacts/bench_audit_rules_20261024.md`）；口径是规则 SQL 逐条耗时之和，不是 `/audit/run` 端到端时延。
 - `LIBMS_MYSQL` 可选；找不到 mysql 或未设口令时脚本打印原因并跳过（退出码 0），不硬编码路径/口令。
 
 ---

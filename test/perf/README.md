@@ -1,9 +1,9 @@
 # test/perf —— 可选性能实测脚本
 
 `bench_audit_rules.py`：巡检 14 项检查（10 条规则）在万级数据（1 万图书 / 5 万借阅）下的逐条 SQL 耗时，
-用于复现论文 6.2.2 的「最慢 134 ms、串行合计约 1.06 s」口径（2026-10-20 两次复测取小，见 `test/artifacts/bench_audit_rules_20261020.md`）；最终代码（新 jar）2026-10-24 复测 R1 98 ms、合计 925 ms，见 `test/artifacts/bench_audit_rules_20261024.md`。
+用于复现「最慢 134 ms、串行合计约 1.06 s」口径（2026-10-20 两次复测取小，见 `test/artifacts/bench_audit_rules_20261020.md`）；最终代码（新 jar）2026-10-24 复测 R1 98 ms、合计 925 ms，见 `test/artifacts/bench_audit_rules_20261024.md`。
 
-`verify_audit_rules.py`：巡检 14 项检查（10 条规则）的双向验证（注入 14 类异常应全部检出、4 类合法边界应不误报），对应论文 6.2.2 的「14/14 检出、4/4 未误报」。
+`verify_audit_rules.py`：巡检 14 项检查（10 条规则）的双向验证（注入 14 类异常应全部检出、4 类合法边界应不误报），对应巡检口径的「14/14 检出、4/4 未误报」。
 
 ## 用法
 

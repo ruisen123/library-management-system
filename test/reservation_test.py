@@ -216,7 +216,7 @@ print("\n[4] 过期回收")
 db_one(f"UPDATE reservation SET expire_time=DATE_SUB(NOW(), INTERVAL 1 MINUTE) WHERE id={r_c.get('id')};")
 _c, b = req("POST", "/reservations/expire", token=A)
 # 2026-10-24（D2-05）：该端点仅系统管理员（ReservationController.java:79-80），
-# 原套件只用 admin 调过一次、零负向保护——"仅 ADMIN"这个口径（论文表 3-2 修正依据）无人守门。
+# 原套件只用 admin 调过一次、零负向保护——"仅 ADMIN"这个口径（权限口径修正依据）无人守门。
 # 负向断言并入本条目（等价替换，不新增计数 → 585 不变）。
 _c, b_lib = req("POST", "/reservations/expire", token=L)
 _c, b_rd = req("POST", "/reservations/expire", token=T3)

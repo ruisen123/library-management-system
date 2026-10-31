@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const BASE = 'http://localhost:5173';
 // 2026-10-24（D2-13）：回归截图改写 test/artifacts/ 运行产物目录，
-// 不再覆写交付物目录 docs/界面截图/2026-10-23_推荐项/（一次脏跑就会替换论文配图）
+// 不再覆写交付物目录 docs/界面截图/2026-10-23_推荐项/（一次脏跑就会替换交付截图）
 const _d = new Date();
 const _p2 = (n) => String(n).padStart(2, '0');
 const STAMP = '' + _d.getFullYear() + _p2(_d.getMonth() + 1) + _p2(_d.getDate())

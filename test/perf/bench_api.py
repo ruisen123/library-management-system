@@ -1,13 +1,13 @@
 
 # -*- coding: utf-8 -*-
-"""LibMS 接口性能压测（test/perf）——产出论文表 6-4 与表 6-5 的可复现数据
+"""LibMS 接口性能压测（test/perf）——产出性能指标的可复现数据
 
 用法：
   set LIBMS_DB_PWD=***           # 必填：测试库口令
   python test/perf/bench_api.py
   python test/perf/bench_api.py --dry-run
 
-口径（与论文 6.3 一致）：
+口径（与设计文档一致）：
   表 6-4  接口响应时间：每场景预热 5 次后采样 20 次取均值；万级场景先灌 1 万图书 + 5 万借阅记录
   表 6-5  并发容量：每接口 300 次，并发 10 与 50 两档，累计 2400 次；用演示种子数据量
 
@@ -170,7 +170,7 @@ def bench_scen(tag):
 
 def main():
     print("=" * 78)
-    print("LibMS 接口性能压测（产出论文表 6-4 / 表 6-5）")
+    print("LibMS 接口性能压测（产出性能指标）")
     print("=" * 78)
     if DRY:
         print("[dry-run] reset_seed → 灌万级 → 7 场景 → 并发 10/50 → reset_seed")

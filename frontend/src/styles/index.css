@@ -26,7 +26,7 @@
   --el-mask-color: rgba(245, 247, 250, 0.5);
 }
 
-/* 2. 全局字体栈（跨平台，答辩环境零风险） */
+/* 2. 全局字体栈（跨平台，各环境零风险） */
 body {
   font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
   font-size: 14px;

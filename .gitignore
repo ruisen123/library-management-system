@@ -13,7 +13,7 @@ __pycache__/
 *.pyo
 
 # ---- 测试临时产物 ----
-# 注意：test/artifacts 下的 .md 报告是交付证据（论文引用），必须保留；
+# 注意：test/artifacts 下的 .md 报告是交付证据（文档引用），必须保留；
 #       这里只排除同目录里测试运行时生成的 xlsx。
 test/artifacts/*.xlsx
 
@@ -46,7 +46,7 @@ Thumbs.db
 deploy/docker/.env
 deploy/.env
 
-# ---- 论文与审查归档（给"看代码的人"的包里不需要；若对方是老师要看论文材料，把下面两行删掉）----
+# ---- 内部审查归档（不随代码分发）----
 thesis/
 审查归档/
 

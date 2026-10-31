@@ -1,7 +1,7 @@
 package com.library.common.constant;
 
 /**
- * 预约业务参数（与借阅规则一样集中写死，便于论文口径与测试断言保持一致）
+ * 预约业务参数（与借阅规则一样集中写死，便于文档口径与测试断言保持一致）
  */
 public interface ReservationConstant {
     /** 到书后保留天数：逾期未取则顺延给下一位 */

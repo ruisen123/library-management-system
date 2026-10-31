@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * 站内通知实体（对应表 notification）
  *
  * 与 reservation 同为扩展表，不设逻辑删除列：已读旧消息由保留期任务物理清理，
- * 因此"5 张表有 deleted"的巡检与答辩口径保持不变。
+ * 因此"5 张表有 deleted"的巡检与数据口径保持不变。
  */
 @Data
 @TableName("notification")
