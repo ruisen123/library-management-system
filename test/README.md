@@ -23,7 +23,8 @@ python test/run_all.py --browser
 **不再需要人工逐脚本重置种子**——运行器在每个套件前自动重置（`docs/04_数据库设计.sql`），
 这是历史"顺序污染导致静默缩量"问题的根治方案。
 
-> ⚠️ **注意**：`reset_seed()` 会 **DROP/重建 `library_db`**（`test/_common.py:101-102`），**不是隔离临时库**；运行全量回归前先备份非种子数据。
+> ⚠️ **注意**：`reset_seed()` 会 **DROP/重建 `library_db`**（`test/_common.py:126-127`），**不是隔离临时库**；运行全量回归前先备份非种子数据。
+> ⚠️ **封面专项（`test/cover_test.py`）按 `<项目根>/upload/` 验落盘**：跑回归时后端须以项目根为 cwd 启动（或以 `FILE_UPLOAD_DIR` 显式指向该目录）；一键启动从 `backend/` 起会落 `backend/upload`，该专项 2 条落盘断言会失败（2026-11-04 实测）。
 
 ## 2. 目录结构
 

@@ -41,7 +41,7 @@ const request = axios.create({
 
 if (useMock) {
   // 仅 mock 模式装配本地适配器：适配器在模块初始化时同步就位（无异步竞态），mock 层本身按需加载。
-  // 非 mock 构建下该分支被静态剔除，938 行演示数据（含明文演示口令）不再进入生产产物。
+  // 非 mock 构建下该分支被静态剔除，演示数据（含明文演示口令）不再进入生产产物。
   request.defaults.adapter = async (config) => {
     const { mockAdapter } = await import('./mock')
     return mockAdapter(config)

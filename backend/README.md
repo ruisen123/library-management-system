@@ -10,7 +10,7 @@
 | MyBatis-Plus 3.5.5 | ORM，免写基础 CRUD + 分页插件 |
 | MySQL 8.0 | 数据库（库名 `library_db`） |
 | jjwt 0.12.5 | 登录令牌（JWT） |
-| Knife4j 4.4.0 | 接口文档（`/doc.html`） |
+| Knife4j 4.5.0 | 接口文档（`/doc.html`） |
 | Hutool 5.8.27 | 工具库（BCrypt 密码加密等） |
 
 ## 目录结构
@@ -72,7 +72,7 @@ curl -X POST http://localhost:8080/auth/login \
 ```
 
    预期返回 `{"code":200,...,"data":{"token":"...","user":{...}}}`；
-3. **接口文档**：浏览器访问 `http://localhost:8080/doc.html`，在文档页可直接调试登录接口。
+3. **接口文档**：默认关闭；需设 `APP_API_DOCS_ENABLED=true` 后访问 `http://localhost:8080/doc.html`，在文档页可直接调试登录接口。
 
 ## 测试账号
 
@@ -88,4 +88,4 @@ curl -X POST http://localhost:8080/auth/login \
 - 认证方式：请求头 `token` 携带 JWT（`jwt.header` 配置）
 - 分页返回：`data` 为 `{ records: [], total, size, current }`
 
-> 开发进度：全部 12 个模块（认证 / 用户 / 图书 / 分类 / 出版社 / 借阅 / 罚金 / 统计 / 公告 / 日志 / 个人中心 / 规则）均已交付并通过联调测试。
+> 开发进度：全部 15 个控制器（认证 / 用户 / 图书 / 分类 / 出版社 / 借阅 / 罚金 / 统计 / 公告 / 日志 / 个人中心 / 规则 / 预约 / 巡检 / 通知）均已交付并通过联调测试。

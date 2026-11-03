@@ -6,16 +6,16 @@
 
 覆盖图书档案、读者账号、借还办理、预约排队、逾期罚金、数据统计与运行时数据一致性巡检，形成从档案管理到借还闭环的完整链路。
 
-![操作演示](docs/demo/demo.gif)
+![操作演示](docs/09_demo/demo.gif)
 
-> 完整演示（含登录，34 秒）：[docs/demo/demo.webm](docs/demo/demo.webm)
+> 完整演示（含登录，34 秒）：[docs/09_demo/demo.webm](docs/09_demo/demo.webm)
 
 ## 和其他图书管理系统比，多了什么
 
 | 能力 | 做了什么 | 去哪儿核对 |
 |---|---|---|
 | **运行时数据一致性巡检** | 10 条规则 / 14 项检查，在同一个只读事务内比对库存、在借数、预约与业务记录，输出实际值、期望值与定位，只检测不自动改数据 | 上面演示的第二屏；`backend/src/main/java/com/library/audit/` |
-| **自动化回归 585 项** | 19 个套件覆盖接口、边界、安全、并发、巡检、E2E 与浏览器端，每轮落盘报告 | `test/`；`test/artifacts/` 132 份历史报告 |
+| **自动化回归 585 项** | 19 个套件覆盖接口、边界、安全、并发、巡检、E2E 与浏览器端，每轮落盘报告 | `test/`；`test/artifacts/` 现存 **10 份** `audit_*.md` + **7 份** `mail_*.md`（更早的 102 份已于 2026-11-02 清理） |
 | **生成列唯一索引** | 用 STORED 生成列解决「逻辑删除后唯一约束仍然撞车」的问题，4 张表落地 | `docs/04_数据库设计.sql`（搜 `uk_isbn`） |
 | **密码指纹令牌失效** | 令牌里带密码摘要，改密后旧令牌立即失效，无需服务端会话表 | `AuthServiceImpl`、`JwtUtils`、`AuthInterceptor` |
 
@@ -118,7 +118,7 @@ docker pull ghcr.io/ruisen123/library-management-system-frontend:latest
 ```
 backend/    Spring Boot 后端（Java 21，Maven，controller/service/mapper/audit）
 frontend/   Vue 3 前端（Vite，views 下 17 个页面）
-docs/       数据库脚本、设计与联调文档、从零运行手册、界面截图、演示素材（demo/）
+docs/       数据库脚本、设计与联调文档、从零运行手册、界面截图、演示素材（09_demo/）
 test/       自动化回归（Python 黑盒套件 + Playwright 浏览器套件）与 CI 结构断言
 deploy/     部署脚本、SQL 迁移与 Docker Compose
 .github/    CI 工作流
@@ -186,9 +186,9 @@ CI 实测结果：**19/19 套件、585 项断言、0 失败**（专项 53 项另
 
 ## 开发过程
 
-`test/artifacts/` 保留了 **132 份**按时间命名的历史报告（`audit_YYYYMMDD_HHMMSS.md`、`mail_*.md`），每份记录当轮的套件结果、断言数与失败明细。
+`test/artifacts/` 现存 **10 份**按时间命名的 `audit_*.md` 与 **7 份** `mail_*.md`；更早的 102 份已于 2026-11-02 清理，说明见该目录 `README.md`。
 
-之所以有这么多份：每次改动后都跑一遍全量回归并把报告落盘，而不是攒到最后一次性验证。这些报告也可反向核对——某轮修了哪个缺陷、当时断言数是多少，都能在对应的报告里查到。
+之所以有这么多份：每次改动后都跑一遍全量回归并把报告落盘，而不是攒到最后一次性验证。这些报告也可反向核对——某轮修了哪个缺陷、当时断言数是多少，都能在对应的报告里查到**（现存 17 份范围内；10-24 之前的轮次以系统测试报告与审查归档记录为准）**。
 
 
 ## 文档
