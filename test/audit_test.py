@@ -30,7 +30,7 @@ except Exception:
     ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 JAVA_RULES = os.path.join(ROOT, "backend", "src", "main", "java", "com", "library", "audit", "AuditRules.java")
-TABLE_MD = os.path.join(ROOT, "thesis", "过程材料", "规则清单唯一口径表_2026-10-14.md")
+TABLE_MD = os.path.join(ROOT, "thesis", "08_过程材料", "规则清单唯一口径表_2026-10-14.md")
 # thesis/ 不入库，CI 上没有原件；回退到随仓库分发的口径表副本（内容逐字一致，
 # 仅将作者姓名替换为「作者」）。本机存在 thesis/ 原件时仍以原件为准。
 TABLE_MD_FIXTURE = os.path.join(ROOT, "test", "fixtures", "巡检规则口径表.md")
