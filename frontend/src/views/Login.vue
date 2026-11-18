@@ -6,18 +6,13 @@
     <!-- ② 中层：向右渐变，照片向右淡出成白 -->
     <div class="bg-fade"></div>
 
-    <!-- ③ 顶层：品牌 + 登录卡，浮在照片之上 -->
+    <!-- ③ 顶层：品牌与登录卡合为一张卡（2026-11-18 P2-A：消除"两块拼接"感），浮在照片之上 -->
     <main class="foreground">
-      <div class="brand">
-        <div class="brand-badge">
-          <el-icon :size="15"><Reading /></el-icon>
-          <span>Spring Boot 3.2 · Vue 3 · MySQL 8</span>
-        </div>
-        <h1 class="brand-title">LibMS 图书借阅管理系统</h1>
-        <p class="brand-sub">面向中小型图书馆的借还管理平台</p>
-      </div>
-
       <div class="login-card">
+        <div class="brand">
+          <h1 class="brand-title">LibMS 图书借阅管理系统</h1>
+          <p class="brand-sub">面向中小型图书馆的借还管理平台</p>
+        </div>
         <div class="login-title">{{ mode === 'login' ? '欢迎登录' : '注册读者证' }}</div>
         <div class="login-sub">
           {{
@@ -221,6 +216,12 @@
             </el-button>
           </div>
         </template>
+
+        <!-- 技术栈：降为卡片底部辅助行，不与品牌抢视觉（P2-A） -->
+        <div class="tech-line">
+          <el-icon :size="13"><Reading /></el-icon>
+          <span>Spring Boot 3.2 · Vue 3 · MySQL 8</span>
+        </div>
       </div>
     </main>
   </div>
@@ -427,20 +428,14 @@ async function quickLogin(username) {
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 30px;
   padding: 4.5vh 5.5vw 4.5vh 0;
 }
 
+/* 品牌区：卡片内顶部标题组，不再独立成块（P2-A） */
 .brand {
-  width: 400px;
-  /* 项目无全局 border-box，这里显式声明，保证与登录卡左边缘对齐 */
-  box-sizing: border-box;
-  /* 品牌区落在渐变过渡带上，加一层近白半透明底 + 轻模糊，避免书脊纹理干扰小字 */
-  padding: 16px 18px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(3px);
-  animation: fadeUp 0.55s ease both;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--libms-border-light);
 }
 @keyframes fadeUp {
   from {
@@ -452,57 +447,56 @@ async function quickLogin(username) {
     transform: none;
   }
 }
-.brand-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 5px 13px;
-  border-radius: 999px;
-  font-size: 12px;
-  color: #2b6cb0;
-  background: rgba(240, 247, 255, 0.9);
-  border: 1px solid rgba(43, 108, 176, 0.16);
-}
 .brand-title {
-  margin: 14px 0 0;
-  font-size: 27px;
+  margin: 0;
+  font-size: 22px;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.35;
   letter-spacing: 0.3px;
-  color: #16324f;
+  color: var(--libms-aside);
 }
 .brand-sub {
-  margin: 8px 0 0;
-  font-size: 13.5px;
-  color: #5c7189;
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--libms-text-regular);
+}
+/* 技术栈辅助行：12px 三级文字，无边框无底色 */
+.tech-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--libms-border-light);
+  font-size: 12px;
+  color: var(--libms-text-secondary);
 }
 
 .login-card {
   width: 400px;
   box-sizing: border-box;
-  padding: 26px 26px 22px;
-  border-radius: 14px;
-  background: #ffffff;
-  border: 1px solid #e8eff8;
-  box-shadow:
-    0 18px 44px rgba(23, 62, 112, 0.12),
-    0 2px 8px rgba(23, 62, 112, 0.06);
-  animation: fadeUp 0.55s 0.08s ease both;
+  padding: 26px 26px 20px;
+  border-radius: 12px;
+  background: var(--libms-bg-card);
+  border: 1px solid var(--libms-border);
+  box-shadow: var(--libms-shadow-pop);
+  animation: fadeUp 0.55s ease both;
 }
+/* 登录/注册切换标题：降为区块级，品牌才是页面主标题 */
 .login-title {
-  font-size: 21px;
-  font-weight: 700;
-  color: #1f2d3d;
-  letter-spacing: 0.5px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--libms-text-primary);
 }
 .login-sub {
-  margin: 6px 0 18px;
-  font-size: 12.5px;
-  color: #8a94a6;
+  margin: 4px 0 16px;
+  font-size: 12px;
+  color: var(--libms-text-secondary);
 }
 .divider-text {
-  font-size: 11.5px;
-  color: #9aa5b6;
+  font-size: 12px;
+  color: var(--libms-text-secondary);
   white-space: nowrap;
 }
 
@@ -512,8 +506,8 @@ async function quickLogin(username) {
   justify-content: center;
   gap: 2px;
   margin: 10px 0 2px;
-  font-size: 12.5px;
-  color: #8a94a6;
+  font-size: 13px;
+  color: var(--libms-text-regular);
 }
 
 .quick-list {
@@ -524,11 +518,11 @@ async function quickLogin(username) {
 .quick-list .quick-btn {
   width: 100%;
   margin: 0;
-  height: 40px;
+  height: 36px;
   justify-content: flex-start;
   padding: 0 13px;
-  border-color: #e3e8ef;
-  color: #33415c;
+  border-color: var(--libms-border);
+  color: var(--libms-text-regular);
   transition:
     border-color 0.16s ease,
     background 0.16s ease,
@@ -547,16 +541,16 @@ async function quickLogin(username) {
   transform: translateY(-1px);
 }
 .quick-ico {
-  color: #5b7ba5;
+  color: var(--libms-text-secondary);
 }
 .quick-name {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
 }
 .quick-acc {
   margin-left: auto;
-  font-size: 11.5px;
-  color: #9aa5b6;
+  font-size: 12px;
+  color: var(--libms-text-secondary);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -575,7 +569,6 @@ async function quickLogin(username) {
     justify-content: flex-end;
     padding: 0 5vw 5vh;
   }
-  .brand,
   .login-card {
     width: 100%;
     max-width: 400px;
@@ -583,9 +576,9 @@ async function quickLogin(username) {
 }
 @media (max-width: 820px) {
   .brand-title {
-    font-size: 22px;
+    font-size: 19px;
   }
-  .brand-badge {
+  .tech-line {
     display: none;
   }
 }

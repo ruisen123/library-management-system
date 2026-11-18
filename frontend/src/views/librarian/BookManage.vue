@@ -3,7 +3,9 @@
   <div v-loading="loading" class="page-card">
     <div class="card-title">图书档案管理</div>
 
+    <!-- 筛选与档案操作分区（P2-C）：左查询右操作，同一行内两组 -->
     <div class="toolbar">
+      <div class="filter-group">
       <el-input
         v-model="query.keyword"
         placeholder="书名 / 作者 / ISBN"
@@ -20,12 +22,15 @@
       <el-checkbox v-model="query.onlyStock">仅看有库存</el-checkbox>
       <el-button type="primary" @click="loadList">查询</el-button>
       <el-button @click="resetQuery">重置</el-button>
+      </div>
       <div style="flex: 1"></div>
+      <div class="action-group">
       <el-button data-testid="book-import-template" @click="downloadTemplate">下载导入模板</el-button>
       <el-button data-testid="book-import-open" @click="openImport">批量导入</el-button>
       <el-button type="primary" @click="openDialog(null)">
         <el-icon><Plus /></el-icon>&nbsp;新增图书
       </el-button>
+      </div>
     </div>
 
     <el-table :data="list" stripe>
@@ -36,18 +41,26 @@
           <BookCover :book="row" size="sm" />
         </template>
       </el-table-column>
-      <el-table-column prop="title" label="书名" min-width="220" show-overflow-tooltip />
-      <el-table-column prop="isbn" label="ISBN" width="140" />
-      <el-table-column prop="author" label="作者" width="140" show-overflow-tooltip />
-      <el-table-column prop="categoryName" label="分类" width="110" />
-      <el-table-column prop="publisherName" label="出版社" width="160" show-overflow-tooltip />
-      <el-table-column label="定价" width="90" align="right">
-        <template #default="{ row }">{{
-          row.price == null ? '—' : '¥' + Number(row.price).toFixed(2)
-        }}</template>
+      <el-table-column prop="title" label="书名" min-width="180" show-overflow-tooltip>
+        <template #default="{ row }">
+          <span class="book-title-cell">{{ row.title }}</span>
+        </template>
       </el-table-column>
-      <el-table-column prop="totalStock" label="馆藏" width="70" align="center" />
-      <el-table-column label="可借" width="90" align="center">
+      <el-table-column prop="isbn" label="ISBN" width="130">
+        <template #default="{ row }">
+          <span class="cell-aux mono">{{ row.isbn }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="author" label="作者" min-width="100" show-overflow-tooltip />
+      <el-table-column prop="categoryName" label="分类" width="104" />
+      <el-table-column prop="publisherName" label="出版社" min-width="140" show-overflow-tooltip />
+      <el-table-column label="定价" width="80" align="right">
+        <template #default="{ row }">
+          <span class="mono">{{ row.price == null ? '—' : '¥' + Number(row.price).toFixed(2) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="totalStock" label="馆藏" width="60" align="center" />
+      <el-table-column label="可借" width="80" align="center">
         <template #default="{ row }">
           <!-- 与读者端同口径：待取预约占用副本，真实可借数 = stock - reservedCount -->
           <el-tag v-if="availableStock(row) <= 0" type="danger" size="small">无库存</el-tag>
@@ -57,9 +70,17 @@
           <el-tag v-else type="success" size="small">{{ availableStock(row) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="borrowCount" label="累计借阅" width="90" align="center" />
-      <el-table-column prop="location" label="馆藏位置" width="110" />
-      <el-table-column label="操作" width="130" fixed="right">
+      <el-table-column prop="borrowCount" label="累计借阅" width="80" align="center">
+        <template #default="{ row }">
+          <span class="cell-aux">{{ row.borrowCount }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="location" label="馆藏位置" min-width="90">
+        <template #default="{ row }">
+          <span v-if="row.location" class="cell-aux">{{ row.location }}</span><span v-else class="cell-empty">—</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="110">
         <template #default="{ row }">
           <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
           <el-button link type="danger" @click="removeBook(row)">删除</el-button>
@@ -516,6 +537,35 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* P2-C：筛选/操作分区 + 表格主次（书名主字段，ISBN/位置/累计借阅辅助化，不删列） */
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--libms-space-md);
+}
+.action-group {
+  display: flex;
+  align-items: center;
+  gap: var(--libms-space-sm);
+  padding-left: var(--libms-space-md);
+  border-left: 1px solid var(--libms-border);
+}
+.book-title-cell {
+  font-weight: 600;
+  color: var(--libms-text-primary);
+}
+.cell-aux {
+  color: var(--libms-text-secondary);
+  font-size: 13px;
+}
+.cell-empty {
+  color: var(--libms-text-secondary);
+  font-size: 13px;
+}
+.mono {
+  font-variant-numeric: tabular-nums;
+}
 /* 封面编辑区（2026-10-25）：左侧大预览，右侧上传 + 地址 + 提示 */
 .cover-editor {
   display: flex;

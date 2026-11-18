@@ -47,7 +47,7 @@
         <template #default="{ row }">{{ row.paidTime || '—' }}</template>
       </el-table-column>
       <el-table-column prop="remark" label="备注" min-width="180" show-overflow-tooltip />
-      <el-table-column label="操作" width="120" fixed="right">
+      <el-table-column label="操作" width="120">
         <template #default="{ row }">
           <el-button v-if="row.status === 1" link type="success" @click="doPay(row)">
             标记已缴

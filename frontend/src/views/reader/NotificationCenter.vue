@@ -21,7 +21,8 @@
       <el-tab-pane label="仅未读" name="unread" />
     </el-tabs>
 
-    <div v-loading="loading" class="notify-list">
+    <!-- 2026-11-18 P4：消息属阅读型内容，给阅读宽度上限（窄屏自动回落，不写死） -->
+    <div v-loading="loading" class="notify-list notify-wrap">
       <div
         v-for="n in list"
         :key="n.id"
@@ -153,6 +154,10 @@ onMounted(load)
 .notify-unread {
   font-size: 12.5px;
   color: #8a94a6;
+}
+/* 阅读宽度上限：消息正文超宽屏一行过长难以扫读（窄屏不足此宽时自动回落） */
+.notify-wrap {
+  max-width: 960px;
 }
 .notify-list {
   min-height: 220px;

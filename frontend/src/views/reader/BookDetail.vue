@@ -215,11 +215,15 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* 2026-11-18 P4：详情页阅读宽度上限，避免 1600+ 超宽屏正文一行过长（不写死 px，窄屏自动回落） */
+:deep(.page-card) {
+  max-width: 1080px;
+}
 .detail-hero {
   display: flex;
   gap: 24px;
   padding: 8px 4px 20px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid var(--libms-border-light);
 }
 .hero-cover {
   flex: 0 0 auto;
@@ -324,19 +328,29 @@ onMounted(async () => {
 .same-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 96px;
+  width: 132px;
+  padding: 10px;
+  border-radius: var(--libms-radius-card);
+  border: 1px solid var(--libms-border);
+  background: var(--libms-bg-card);
   text-decoration: none;
   color: inherit;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.same-item:hover {
+  border-color: var(--el-color-primary-light-5);
+  box-shadow: var(--libms-shadow-card);
 }
 .same-item:hover .same-title {
   color: #2b6cb0;
 }
 .same-title {
-  margin-top: 6px;
-  font-size: 12px;
-  line-height: 1.4;
-  text-align: center;
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
   color: #303133;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -344,8 +358,9 @@ onMounted(async () => {
   overflow: hidden;
 }
 .same-author {
-  font-size: 11px;
-  color: #909399;
+  font-size: 12px;
+  color: var(--libms-text-secondary);
   margin-top: 2px;
+  text-align: left;
 }
 </style>

@@ -14,10 +14,35 @@
       </div>
     </div>
 
-    <!-- 报表导出：汇总 / 借阅明细 / 罚金明细 / 热门图书 -->
+    <!-- 图表区 -->
+    <div class="chart-flex" style="margin-bottom: 16px">
+      <div class="page-card" style="margin-bottom: 0">
+        <div class="card-title">月度借阅量趋势（近 12 个月）</div>
+        <div ref="trendRef" style="height: 320px"></div>
+      </div>
+      <div class="page-card" style="margin-bottom: 0">
+        <div class="card-title">分类借阅占比</div>
+        <div ref="pieRef" style="height: 320px"></div>
+      </div>
+    </div>
+
+    <!-- 热度榜 -->
+    <div class="page-card">
+      <div class="card-title">借阅热度 TOP10 图书</div>
+      <el-table :data="topBooks" stripe>
+        <el-table-column type="index" label="排名" width="70" align="center" />
+        <el-table-column prop="title" label="书名" min-width="240" />
+        <el-table-column prop="author" label="作者" width="160" />
+        <el-table-column prop="categoryName" label="分类" width="110" />
+        <el-table-column prop="borrowCount" label="累计借阅次数" width="130" sortable />
+      </el-table>
+    </div>
+
+    <!-- 辅助工具区（P2-B：导出/巡检从首屏移到数据主线之后） -->
+    <!-- 报表导出（P2-B 降级为细条工具行，功能全保留） -->
     <div class="page-card report-card">
-      <div class="card-title report-title">
-        <span>借阅报表导出</span>
+      <div class="report-title">
+        <span class="tool-label">借阅报表导出</span>
         <span class="report-actions">
           <el-date-picker
             v-model="exportRange"
@@ -40,15 +65,13 @@
           >
         </span>
       </div>
-      <div class="report-hint">
-        导出汇总、借阅明细、罚金明细、热门图书；不选日期默认近 30 天，单次最多 20000 行。
-      </div>
+      <span class="report-hint">含汇总/借阅/罚金/热门 4 sheet；不选日期默认近 30 天，单次最多 20000 行</span>
     </div>
 
     <!-- 数据健康诊断（只读巡检：检测并定位账实不符，不修改业务数据） -->
-    <div class="page-card" style="margin-bottom: 16px">
-      <div class="card-title audit-title">
-        <span>数据健康诊断</span>
+    <div class="page-card" style="margin-bottom: 0">
+      <div class="audit-title">
+        <span class="tool-label">数据健康诊断</span>
         <span class="audit-actions">
           <el-tag
             v-if="audit"
@@ -110,29 +133,6 @@
       </template>
     </div>
 
-    <!-- 图表区 -->
-    <div class="chart-flex" style="margin-bottom: 16px">
-      <div class="page-card" style="margin-bottom: 0">
-        <div class="card-title">月度借阅量趋势（近 12 个月）</div>
-        <div ref="trendRef" style="height: 300px"></div>
-      </div>
-      <div class="page-card" style="margin-bottom: 0">
-        <div class="card-title">分类借阅占比</div>
-        <div ref="pieRef" style="height: 300px"></div>
-      </div>
-    </div>
-
-    <!-- 热度榜 -->
-    <div class="page-card" style="margin-bottom: 0">
-      <div class="card-title">借阅热度 TOP10 图书</div>
-      <el-table :data="topBooks" stripe>
-        <el-table-column type="index" label="排名" width="70" align="center" />
-        <el-table-column prop="title" label="书名" min-width="240" />
-        <el-table-column prop="author" label="作者" width="160" />
-        <el-table-column prop="categoryName" label="分类" width="110" />
-        <el-table-column prop="borrowCount" label="累计借阅次数" width="130" sortable />
-      </el-table>
-    </div>
   </div>
 </template>
 
@@ -393,48 +393,56 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 12px;
 }
 .audit-actions {
   display: flex;
   align-items: center;
 }
 .audit-hint {
-  color: #7a8699;
+  color: var(--libms-text-regular);
   font-size: 13px;
   line-height: 1.9;
 }
 .audit-meta {
-  color: #5a6675;
+  color: var(--libms-text-regular);
   font-size: 13px;
 }
 .audit-expect {
-  color: #8a97a6;
-  font-size: 12.5px;
+  color: var(--libms-text-secondary);
+  font-size: 12px;
 }
 .audit-hit {
-  color: #c05621;
+  color: var(--libms-accent);
   font-weight: 600;
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
-/* 报表导出条 */
+/* 辅助工具区（P2-B）：标签 14px/600，无主色竖条，不与数据卡抢视觉 */
+.tool-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--libms-text-primary);
+}
 .report-card {
   margin-bottom: 16px;
+  padding: 12px 16px;
 }
 .report-title {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
 }
 .report-actions {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-left: auto;
 }
 .report-hint {
-  color: #7a8699;
-  font-size: 12.5px;
-  line-height: 1.8;
+  color: var(--libms-text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
 }
 </style>

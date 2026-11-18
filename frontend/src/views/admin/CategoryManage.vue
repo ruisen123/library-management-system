@@ -11,10 +11,10 @@
     </div>
 
     <el-table :data="list" stripe>
-      <el-table-column prop="name" label="分类名称" />
+      <el-table-column prop="name" label="分类名称" min-width="200" />
       <el-table-column prop="sort" label="排序值" width="120" align="center" />
       <el-table-column prop="createTime" label="创建时间" width="180" />
-      <el-table-column label="操作" width="140" fixed="right">
+      <el-table-column label="操作" width="140">
         <template #default="{ row }">
           <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
           <el-button link type="danger" @click="removeCategory(row)">删除</el-button>

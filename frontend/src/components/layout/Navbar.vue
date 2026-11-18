@@ -89,8 +89,8 @@ const onCommand = (cmd) => {
   /* 32px = 原 24px + 8px：与 styles/index.css 里 body margin 归零配套，
      让顶栏文字与窗口右边的距离与改动前保持一致（改动前是 8px body margin + 24px 内边距） */
   padding: 0 32px;
-  border-bottom: 1px solid #e4e7ed;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid var(--libms-border);
+  box-shadow: var(--libms-shadow-card);
 }
 .header-left {
   display: flex;
@@ -106,16 +106,17 @@ const onCommand = (cmd) => {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: var(--libms-space-lg);
 }
 .notify-badge :deep(.el-badge__content) {
   border: none;
 }
 .header-user .name {
-  color: #303133;
+  color: var(--libms-text-primary);
+  font-weight: 600;
 }
 .header-user .role {
-  font-size: 12px;
-  color: #909399;
+  font-size: var(--libms-font-aux);
+  color: var(--libms-text-secondary);
 }
 </style>

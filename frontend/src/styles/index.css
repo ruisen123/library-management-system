@@ -1,10 +1,13 @@
 /* ============================================================
    LibMS 全局样式 —— 依据 docs/06_UI风格设计文档.md
    主色「知识蓝 #2B6CB0」通过覆盖 Element Plus CSS 变量全局生效
+   2026-11-18 视觉美化 P1：设计变量集中化 + 基础组件统一
+   （机制保留：body margin=0 / :has 加载遮罩 / 弹窗按侧栏让位居中 / reduced-motion）
    ============================================================ */
 
-/* 1. 覆盖 Element Plus 主色变量（含浅色阶/深色阶派生） */
+/* 1. 设计变量（项目 --libms-* 与 Element --el-* 配套；组件内禁止再写死近似色） */
 :root {
+  /* —— Element Plus 主色覆盖（含浅色阶/深色阶派生，保持原值） —— */
   --el-color-primary: #2b6cb0;
   --el-color-primary-light-3: #5a8cc6;
   --el-color-primary-light-5: #8ab1d9;
@@ -12,12 +15,51 @@
   --el-color-primary-light-8: #d6e4f5;
   --el-color-primary-light-9: #ebf3fb;
   --el-color-primary-dark-2: #22568d;
-  /* 项目自用设计变量 */
+
+  /* —— 品牌色 —— */
   --libms-aside: #1f3552; /* 侧边栏深墨蓝 */
+  --libms-aside-deep: #182a42; /* 侧栏品牌区更深一档 */
   --libms-secondary: #2c7a7b; /* 辅色青墨绿 */
   --libms-accent: #c05621; /* 强调暖赭橙 */
+
+  /* —— 文字色阶（docs/06 §2.3：一级/二级/三级/禁用） —— */
+  --libms-text-primary: #303133; /* 标题、主要字段、关键数据 */
+  --libms-text-regular: #606266; /* 表格正文、表单值、主要说明 */
+  --libms-text-secondary: #909399; /* 辅助文字上限：时间、证号等次级元信息 */
+  --libms-text-placeholder: #c0c4cc; /* 禁用/占位 */
+
+  /* —— 背景与边框 —— */
   --libms-bg: #f5f7fa; /* 页面画布 */
-  --libms-border: #e4e7ed;
+  --libms-bg-card: #ffffff; /* 卡片/容器 */
+  --libms-bg-table-head: #f5f7fa; /* 表头底 */
+  --libms-border: #e4e7ed; /* 常规边框（卡片描边、分隔线） */
+  --libms-border-light: #ebeef5; /* 表格单元格等浅分隔 */
+
+  /* —— 间距（4/8/12/16/24/32 网格，docs/06 §四） —— */
+  --libms-space-xs: 4px;
+  --libms-space-sm: 8px;
+  --libms-space-md: 12px;
+  --libms-space-lg: 16px;
+  --libms-space-xl: 24px;
+  --libms-space-2xl: 32px;
+
+  /* —— 圆角 —— */
+  --libms-radius-control: 4px; /* 输入/按钮/下拉 */
+  --libms-radius-card: 8px; /* 卡片 */
+  --libms-radius-dialog: 8px; /* 弹窗 */
+  --libms-radius-pill: 999px; /* 状态胶囊 */
+
+  /* —— 阴影（克制两档：常态极轻 + 悬停/弹窗） —— */
+  --libms-shadow-card: 0 1px 4px rgba(31, 53, 82, 0.06);
+  --libms-shadow-pop: 0 4px 16px rgba(31, 53, 82, 0.1);
+
+  /* —— 字号层级（docs/06 §三） —— */
+  --libms-font-title: 20px; /* 页面主标题 */
+  --libms-font-section: 16px; /* 区块/卡片标题 */
+  --libms-font-body: 14px; /* 正文 */
+  --libms-font-aux: 12px; /* 辅助 */
+  --libms-font-stat: 28px; /* 统计大数字 */
+
   /* 侧边栏展开宽度（折叠时由 Layout.vue 置为 64px）。弹窗按它让位，见第 9 节 */
   --libms-aside-w: 240px;
   /* 加载遮罩底色：Element Plus 默认 #ffffffe6（90% 白），盖在本就白色的 .page-card 上，
@@ -29,8 +71,9 @@
 /* 2. 全局字体栈（跨平台，各环境零风险） */
 body {
   font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 14px;
-  color: #606266;
+  font-size: var(--libms-font-body);
+  line-height: 1.5;
+  color: var(--libms-text-regular);
   background: var(--libms-bg);
   -webkit-font-smoothing: antialiased;
   /* margin 必须归零：浏览器默认 body { margin: 8px }，会让文档比视口高 16px、页面长期挂着一条
@@ -43,21 +86,23 @@ body {
 
 /* 3. 通用布局类 */
 .page-card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  padding: 16px;
-  margin-bottom: 16px;
+  background: var(--libms-bg-card);
+  border: 1px solid var(--libms-border);
+  border-radius: var(--libms-radius-card);
+  box-shadow: var(--libms-shadow-card);
+  padding: var(--libms-space-lg);
+  margin-bottom: var(--libms-space-lg);
 }
-/* 卡片标题：左侧 3px 主色竖条装饰（对齐 06 文档） */
+/* 卡片标题：左侧 3px 主色竖条装饰（对齐 06 文档）；区块层级 16px/24px/600 */
 .card-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 16px;
+  gap: var(--libms-space-sm);
+  font-size: var(--libms-font-section);
+  line-height: 24px;
   font-weight: 600;
-  color: #303133;
-  margin-bottom: 16px;
+  color: var(--libms-text-primary);
+  margin-bottom: var(--libms-space-lg);
 }
 .card-title::before {
   content: '';
@@ -67,65 +112,123 @@ body {
   border-radius: 2px;
 }
 /* 检索工具栏 */
-.toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; align-items: center; }
+.toolbar { display: flex; flex-wrap: wrap; gap: var(--libms-space-md); margin-bottom: var(--libms-space-lg); align-items: center; }
 .toolbar .el-input, .toolbar .el-select { width: 200px; }
-/* 分页统一右下角 */
-.pager { display: flex; justify-content: flex-end; margin-top: 16px; }
+/* 分页统一右下角（类名被几何断言使用，不得改名） */
+.pager { display: flex; justify-content: flex-end; margin-top: var(--libms-space-lg); }
 
 /* 4. 统计总览卡片 */
-.stat-row { display: flex; gap: 24px; margin-bottom: 16px; }
+.stat-row { display: flex; gap: var(--libms-space-xl); margin-bottom: var(--libms-space-lg); }
 .stat-card {
   flex: 1;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  background: var(--libms-bg-card);
+  border: 1px solid var(--libms-border);
+  border-radius: var(--libms-radius-card);
+  box-shadow: var(--libms-shadow-card);
   padding: 20px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--libms-space-lg);
 }
 .stat-icon {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: var(--libms-radius-card);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
 }
-.stat-num { font-size: 28px; font-weight: 600; color: #303133; line-height: 1.2; font-variant-numeric: tabular-nums; }
-.stat-label { font-size: 12px; color: #909399; }
+.stat-num { font-size: var(--libms-font-stat); font-weight: 600; color: var(--libms-text-primary); line-height: 36px; font-variant-numeric: tabular-nums; }
+.stat-label { font-size: var(--libms-font-aux); line-height: 20px; color: var(--libms-text-secondary); }
 
 /* 5. 图表并排布局 */
-.chart-flex { display: flex; gap: 16px; }
+.chart-flex { display: flex; gap: var(--libms-space-lg); }
 .chart-flex > div { flex: 1; min-width: 0; }
 
-/* 6. 登录页 */
-.login-bg {
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #1f3552 0%, #2b6cb0 100%);
-}
-.login-card {
-  width: 420px;
-  background: #fff;
-  border-radius: 8px;
-  padding: 40px 36px 32px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-.login-brand { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 6px; }
-.login-title { text-align: center; font-size: 20px; font-weight: 600; color: #303133; margin-bottom: 4px; }
-.login-sub { text-align: center; font-size: 12px; color: #909399; margin-bottom: 24px; }
+/* 6. 登录页公共类
+   2026-11-18 P2-A：旧全局 .login-bg/.login-card/.login-brand/.login-title/.login-sub 已清理
+   （grep 全 src 证实无模板引用；Login.vue 用 scoped 同名类，互不影响）。
+   .quick-btn 仍被 Login.vue 一键登录按钮使用，保留。 */
 .quick-btn { width: 100%; margin-top: 8px; }
 
 /* 7. 通用文本工具类 */
 .text-danger { color: var(--el-color-danger); }
 .text-warning { color: var(--el-color-warning); }
-.text-muted { color: #909399; }
+.text-muted { color: var(--libms-text-secondary); }
 
-/* 8. 加载体验：遮罩只作用于数据区 + 新内容淡入
+/* 8. Element Plus 基础组件受控覆盖（P1 新增；只动视觉，不动交互与结构）
+   —— 表头明确（浅灰底 + 600 字重 + 一级文字色）、正文 14px 二级色、
+      行高通过单元格上下 14px 内边距落在 48~56px 区间（docs/06 §五）；
+      固定列大白块改为轻阴影分界，消除"白断层"遮挡感（G-06 基础层）。
+   —— 为何加 body 前缀：Element Plus 组件样式由 unplugin 按需注入，顺序晚于本文件，
+      同特异性选择器会被压回（与第 10 节弹窗让位同一教训，2026-11-18 实测
+      td 行高 40→40、弹窗圆角 4→4 未生效后修正）；变量也必须挂在 body .el-table
+      上而非 :root，否则被组件自身的 .el-table 变量定义覆盖。 */
+body .el-table {
+  --el-table-border-color: var(--libms-border-light);
+  --el-table-header-bg-color: var(--libms-bg-table-head);
+  --el-table-header-text-color: var(--libms-text-primary);
+  --el-table-text-color: var(--libms-text-regular);
+  --el-table-row-hover-bg-color: var(--el-color-primary-light-9);
+  font-size: var(--libms-font-body);
+}
+body .el-table th.el-table__cell {
+  font-weight: 600;
+}
+/* 行高收口：EP 默认单元格上下 8px（单行行实测 40px），改 12px 后单行行 48px，
+   落在 docs/06 §五 48~56px 区间；多行内容行随内容自然增高（P2-C/P3 再做列宽与主次） */
+body .el-table .el-table__cell {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+/* 固定列：去掉默认大面积投影，用 6px 轻阴影提示边界（不遮内容、不改滚动行为） */
+body .el-table .el-table-fixed-column--right,
+body .el-table .el-table-fixed-column--left {
+  background: var(--libms-bg-card);
+}
+body .el-table.is-scrolling-left .el-table-fixed-column--left.is-last-column::before,
+body .el-table.is-scrolling-right .el-table-fixed-column--right.is-first-column::before,
+body .el-table.is-scrolling-middle .el-table-fixed-column--right.is-first-column::before,
+body .el-table.is-scrolling-middle .el-table-fixed-column--left.is-last-column::before {
+  box-shadow: none;
+}
+body .el-table.is-scrolling-right .el-table-fixed-column--right.is-first-column,
+body .el-table.is-scrolling-middle .el-table-fixed-column--right.is-first-column {
+  box-shadow: -6px 0 8px -6px rgba(31, 53, 82, 0.12);
+}
+body .el-table.is-scrolling-left .el-table-fixed-column--left.is-last-column,
+body .el-table.is-scrolling-middle .el-table-fixed-column--left.is-last-column {
+  box-shadow: 6px 0 8px -6px rgba(31, 53, 82, 0.12);
+}
+/* 弹窗：8px 圆角 + 轻阴影；标题一级色 600 字重（居中机制见第 10 节，勿动） */
+body .el-dialog {
+  border-radius: var(--libms-radius-dialog);
+  box-shadow: var(--libms-shadow-pop);
+}
+body .el-dialog__title {
+  font-size: var(--libms-font-section);
+  font-weight: 600;
+  color: var(--libms-text-primary);
+}
+/* 表单：标签用二级文字色，与输入值（一级/二级）拉开可读层级 */
+body .el-form-item__label {
+  color: var(--libms-text-regular);
+}
+/* 状态胶囊：统一全圆角（docs/06 §四"状态标签统一胶囊形"），高度不变 */
+body .el-tag {
+  border-radius: var(--libms-radius-pill);
+}
+/* 按钮/输入圆角对齐 4px 规范（Element 默认即 4px，显式声明防主题漂移） */
+body .el-button {
+  border-radius: var(--libms-radius-control);
+}
+body .el-input__wrapper,
+body .el-select__wrapper {
+  border-radius: var(--libms-radius-control);
+}
+
+/* 9. 加载体验：遮罩只作用于数据区 + 新内容淡入
    —— 切页时旧内容被瞬间换成"空卡片 + 加载遮罩"，而遮罩默认 90% 白又盖住整张卡片
       （标题 / 工具栏 / Tab 头全被糊掉），所以观感是"整个界面变白"。
       实测：遮罩覆盖时长中位 55ms，"旧页面消失"与"遮罩出现"是同一瞬间，
@@ -156,7 +259,7 @@ body {
   pointer-events: none;
 }
 
-/* 9. 弹窗居中：参照「侧边栏右侧的内容区」，且上下左右都居中
+/* 10. 弹窗居中：参照「侧边栏右侧的内容区」，且上下左右都居中
    —— 现状：Element Plus 的弹窗遮罩层铺满整个窗口，弹窗在遮罩层里居中，参照的是「整个窗口」，
       与侧边栏无关。实测窗口 1440 时弹窗中心 720，而内容区中心是 840（相差半个侧边栏宽）。
       另外 el-dialog 默认 margin-top:15vh，纵向也不居中（实测 cy=320，目标 450）。
@@ -182,7 +285,7 @@ body .el-overlay-message-box {
   padding-left: calc(var(--libms-aside-w) + 16px) !important;
 }
 
-/* 10. 轻量动效（2026-10-21 界面改造）
+/* 11. 轻量动效（2026-10-21 界面改造）
    —— 刻意保持克制：只有「进入时淡入上浮」和「可点卡片悬停上浮」两类，单次 160~220ms，不拖沓。
    —— 为什么不用 <transition> 包 router-view：本项目此前试过 fade+out-in，组件根节点带 v-loading 时
       会干扰 transitionend 检测，导致切换后新组件不渲染、页面空白（Layout.vue 里有记录）。

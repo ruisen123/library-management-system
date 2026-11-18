@@ -4,14 +4,16 @@
     <div class="card-title">个人中心</div>
 
     <el-form v-loading="loading" :model="form" label-width="90px" style="max-width: 560px">
+      <!-- 账号信息：系统维护，只读（2026-11-18 P3：与可编辑资料分区，只读有明确标识） -->
+      <div class="form-group-label">账号信息<span class="form-group-hint">由系统维护，不可修改</span></div>
       <el-form-item label="登录名">
-        <el-input :model-value="user.username" disabled />
+        <el-input :model-value="user.username" disabled class="profile-readonly" />
       </el-form-item>
       <el-form-item label="角色">
         <el-tag type="info">{{ roleText(user.role) }}</el-tag>
       </el-form-item>
       <el-form-item v-if="user.readerNo" label="读者证号">
-        <el-input :model-value="user.readerNo" disabled />
+        <el-input :model-value="user.readerNo" disabled class="profile-readonly" />
       </el-form-item>
       <el-form-item v-if="user.role === 'READER'" label="借阅额度">
         <span>{{ user.borrowedCount || 0 }}/{{ user.borrowLimit ?? 5 }} 册</span>
@@ -20,6 +22,7 @@
           <el-tag v-if="cardExpired" type="danger" size="small">已过期</el-tag>
         </span>
       </el-form-item>
+      <div class="form-group-label">资料维护</div>
       <el-form-item label="姓名" required>
         <el-input v-model="form.realName" placeholder="请输入姓名" />
       </el-form-item>
@@ -207,6 +210,29 @@ onMounted(load)
 </script>
 
 <style scoped>
+/* 2026-11-18 P3：表单分区与只读标识（只动视觉，不改字段与校验） */
+.form-group-label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 4px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--libms-border-light);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--libms-text-primary);
+}
+.form-group-hint {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--libms-text-secondary);
+}
+.profile-readonly :deep(.el-input__wrapper) {
+  background: var(--libms-bg);
+}
+.profile-readonly :deep(.el-input__inner) {
+  color: var(--libms-text-regular);
+}
 .profile-hint {
   margin-left: 12px;
   font-size: 12px;

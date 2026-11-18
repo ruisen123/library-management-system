@@ -29,7 +29,7 @@
               <el-tag type="warning" size="small">{{ borrowStatusText(row.status) }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="100" fixed="right">
+          <el-table-column label="操作" width="100">
             <template #default="{ row }">
               <el-button
                 link
@@ -81,7 +81,7 @@
           <el-table-column label="取书截止" width="170">
             <template #default="{ row }">{{ row.expireTime || '—' }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="100" align="center" fixed="right">
+          <el-table-column label="操作" width="100" align="center">
             <template #default="{ row }">
               <el-button
                 v-if="row.status === 1 || row.status === 2"

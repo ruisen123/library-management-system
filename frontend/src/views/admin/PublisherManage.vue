@@ -11,10 +11,10 @@
     </div>
 
     <el-table :data="list" stripe>
-      <el-table-column prop="name" label="出版社名称" />
-      <el-table-column prop="contact" label="联系方式" width="160" />
+      <el-table-column prop="name" label="出版社名称" min-width="200" />
+      <el-table-column prop="contact" label="联系方式" width="120" />
       <el-table-column prop="address" label="地址" min-width="220" show-overflow-tooltip />
-      <el-table-column label="操作" width="140" fixed="right">
+      <el-table-column label="操作" width="140">
         <template #default="{ row }">
           <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
           <el-button link type="danger" @click="removePublisher(row)">删除</el-button>

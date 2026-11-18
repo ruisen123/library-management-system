@@ -9,7 +9,7 @@
       :default-active="activeMenu"
       :collapse="collapsed"
       background-color="#1F3552"
-      text-color="#C0C8D4"
+      text-color="#D5DDE8"
       active-text-color="#FFFFFF"
       :collapse-transition="false"
       router
@@ -124,7 +124,7 @@ watch(
   color: #fff;
   font-size: 17px;
   font-weight: 600;
-  background: #182a42;
+  background: var(--libms-aside-deep);
   white-space: nowrap;
 }
 .layout-aside :deep(.el-menu) {
@@ -146,8 +146,8 @@ watch(
 .menu-fine-hint {
   flex-shrink: 0;
   padding: 0 6px;
-  border-radius: 8px;
-  font-size: 10.5px;
+  border-radius: var(--libms-radius-pill);
+  font-size: 11px;
   line-height: 16px;
   color: #ffb4b4;
   background: rgba(255, 90, 90, 0.16);
@@ -168,8 +168,8 @@ watch(
 .menu-reserve-hint {
   flex-shrink: 0;
   padding: 0 6px;
-  border-radius: 8px;
-  font-size: 10.5px;
+  border-radius: var(--libms-radius-pill);
+  font-size: 11px;
   line-height: 16px;
   color: #b8f0d0;
   background: rgba(60, 200, 120, 0.16);
@@ -181,8 +181,13 @@ watch(
 .layout-aside:has(:deep(.el-menu--collapse)) .menu-reserve-hint {
   display: none;
 }
-/* 激活项：主色背景 + 左侧指示条 */
+/* 激活项：柔和主色底 + 左侧 3px 主色指示条（2026-11-18 P1：整条亮蓝突兀，
+   改为半透明主色底，文字保持白色高对比；宽度/路由/排序不变） */
 .layout-aside :deep(.el-menu-item.is-active) {
-  background: #2b6cb0 !important;
+  background: rgba(43, 108, 176, 0.32) !important;
+  box-shadow: inset 3px 0 0 var(--el-color-primary);
+}
+.layout-aside :deep(.el-menu-item:hover) {
+  background: rgba(255, 255, 255, 0.06);
 }
 </style>

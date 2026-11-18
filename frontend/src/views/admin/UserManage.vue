@@ -31,12 +31,12 @@
 
         <el-table :data="list" stripe>
           <el-table-column prop="readerNo" label="读者证号" width="120" />
-          <el-table-column prop="realName" label="姓名" width="90" />
+          <el-table-column prop="realName" label="姓名" min-width="90" />
           <el-table-column label="性别" width="70" align="center">
             <template #default="{ row }">{{ genderText(row.gender) }}</template>
           </el-table-column>
-          <el-table-column prop="phone" label="联系电话" width="130" />
-          <el-table-column label="在借 / 额度" width="115" align="center">
+          <el-table-column prop="phone" label="联系电话" min-width="130" />
+          <el-table-column label="在借 / 额度" width="100" align="center">
             <template #default="{ row }">
               <el-tag v-if="row.borrowedCount > 0" type="warning" effect="plain"
                 >{{ row.borrowedCount }}/{{ row.borrowLimit ?? 5 }}</el-tag
@@ -44,7 +44,12 @@
               <span v-else>0/{{ row.borrowLimit ?? 5 }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="email" label="通知邮箱" width="170" show-overflow-tooltip />
+          <el-table-column prop="email" label="通知邮箱" min-width="170" show-overflow-tooltip>
+        <template #default="{ row }">
+          <span v-if="row.email">{{ row.email }}</span>
+          <span v-else class="cell-empty">—</span>
+        </template>
+      </el-table-column>
           <el-table-column label="状态" width="80" align="center">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">{{
@@ -52,8 +57,8 @@
               }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="createTime" label="开户时间" width="160" />
-          <el-table-column label="操作" width="230" fixed="right">
+          <el-table-column prop="createTime" label="开户时间" width="170" />
+          <el-table-column label="操作" width="180">
             <template #default="{ row }">
               <el-button v-if="row.status === 1" link type="danger" @click="toggleStatus(row)"
                 >冻结</el-button
@@ -80,17 +85,19 @@
       <!-- ============ 管理员账号 ============ -->
       <el-tab-pane label="管理员账号" name="admin">
         <div class="toolbar">
+          <span class="toolbar-note">管理员 / 馆员账号全量展示，不分页</span>
+          <div style="flex: 1"></div>
           <el-button type="primary" @click="openDialog(null, 'staff')">
             <el-icon><Plus /></el-icon>&nbsp;新增管理员
           </el-button>
         </div>
         <el-table :data="staffList" stripe>
-          <el-table-column prop="username" label="登录名" width="140" />
-          <el-table-column prop="realName" label="姓名" width="120" />
-          <el-table-column label="角色" width="130">
+          <el-table-column prop="username" label="登录名" min-width="140" />
+          <el-table-column prop="realName" label="姓名" min-width="120" />
+          <el-table-column label="角色" min-width="130">
             <template #default="{ row }">{{ roleText(row.role) }}</template>
           </el-table-column>
-          <el-table-column prop="phone" label="联系电话" width="140" />
+          <el-table-column prop="phone" label="联系电话" min-width="140" />
           <el-table-column label="状态" width="90" align="center">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">{{
@@ -99,7 +106,7 @@
             </template>
           </el-table-column>
           <el-table-column prop="createTime" label="创建时间" width="170" />
-          <el-table-column label="操作" width="160" fixed="right">
+          <el-table-column label="操作" width="150">
             <template #default="{ row }">
               <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
               <el-button link @click="resetPwd(row)">重置密码</el-button>
@@ -343,6 +350,15 @@ loadList()
 </script>
 
 <style scoped>
+/* P2.5：空值占位与工具栏说明（T3/T4） */
+.cell-empty {
+  color: var(--libms-text-secondary);
+  font-size: 13px;
+}
+.toolbar-note {
+  font-size: 12px;
+  color: var(--libms-text-secondary);
+}
 .form-hint {
   margin-left: 8px;
   font-size: 12px;

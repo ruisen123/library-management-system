@@ -48,8 +48,12 @@
           v-for="(row, idx) in hotBooks"
           :key="row.id"
           class="hot-card"
+          role="button"
+          tabindex="0"
           data-testid="hot-book-card"
           @click="openDetail(row)"
+          @keydown.enter.prevent="openDetail(row)"
+          @keydown.space.prevent="openDetail(row)"
         >
           <span class="hot-rank" :class="'hot-rank--' + (idx + 1)">{{ idx + 1 }}</span>
           <BookCover :book="row" size="sm" class="hot-cover" />
@@ -653,8 +657,34 @@ onBeforeUnmount(() => {
 .hot-list {
   display: flex;
   gap: 10px;
+  /* 2026-11-18 P4（G-07）：保留横向可滚（内容必须全部可达，禁止用 overflow:hidden 截断）；
+     只改进观感与可访问性：细滑块 + 透明轨道 + 惯性滚动 + 键盘可聚焦 */
   overflow-x: auto;
-  padding-bottom: 2px;
+  overflow-y: hidden;
+  padding-bottom: 6px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 183, 154, 0.55) transparent;
+}
+.hot-list::-webkit-scrollbar {
+  height: 6px;
+}
+.hot-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.hot-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(201, 183, 154, 0.55);
+}
+.hot-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 183, 154, 0.85);
+}
+/* 键盘可访问：卡片可 Tab 聚焦并显示焦点环 */
+.hot-card:focus-visible {
+  outline: 2px solid var(--el-color-primary);
+  outline-offset: 2px;
 }
 .hot-card {
   display: flex;

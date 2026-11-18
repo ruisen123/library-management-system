@@ -384,7 +384,7 @@
               </template>
             </el-table-column>
             <el-table-column prop="renewCount" label="续借次数" width="90" align="center" />
-            <el-table-column label="操作" width="230" fixed="right">
+            <el-table-column label="操作" width="200">
               <template #default="{ row }">
                 <el-button link type="success" data-testid="return-action" @click="doReturn(row)"
                   >归还</el-button
@@ -907,176 +907,10 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
-.borrow-page {
-  padding: 4px 2px 8px;
-}
 
-/* 今日概览条 */
-.today-bar {
-  display: flex;
-  align-items: center;
-  gap: 34px;
-  margin-bottom: 16px;
-  padding: 14px 22px;
-  border-radius: 10px;
-  background: linear-gradient(94deg, #eef6ff 0%, #f9fcff 100%);
-  border: 1px solid #dbe9fa;
-}
-.today-item {
-  display: flex;
-  align-items: baseline;
-  gap: 7px;
-}
-.today-num {
-  font-size: 22px;
-  font-weight: 700;
-  color: #2b6cb0;
-  line-height: 1.1;
-}
-.today-lbl {
-  font-size: 12.5px;
-  color: #7c8ca3;
-}
-.today-item.is-warn .today-num {
-  color: #c05621;
-}
-
-.step-block {
-  margin-bottom: 22px;
-  transition: opacity 0.2s ease;
-}
-.step-block.is-disabled {
-  opacity: 0.55;
-}
-
-.step-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-.step-no {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-  background: #2b6cb0;
-}
-.step-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2d3d;
-}
-.step-hint {
-  font-size: 12px;
-  color: #9aa5b6;
-}
-
-/* 大输入框：扫码枪场景下更好点、更好看 */
-.big-search {
-  display: flex;
-  gap: 10px;
-  max-width: 760px;
-  margin-bottom: 12px;
-}
-
-.pick-table {
-  max-width: 900px;
-  margin-bottom: 12px;
-}
-.pick-hint {
-  font-size: 11.5px;
-  color: #b6c1d1;
-}
-
-/* 已选读者：大身份条 */
-.id-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  max-width: 900px;
-  margin: 4px 0 6px;
-  padding: 14px 18px;
-  border-radius: 10px;
-  background: linear-gradient(96deg, #eef6ff 0%, #f8fbff 100%);
-  border: 1px solid #d6e6f8;
-  animation: idIn 0.22s ease both;
-}
-@keyframes idIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.id-avatar {
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: 600;
-  color: #fff;
-  background: linear-gradient(140deg, #4a90d9, #2b6cb0);
-}
-.id-main {
-  flex: 1;
-  min-width: 0;
-}
-.id-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #16324f;
-}
-.id-no {
-  font-size: 12.5px;
-  font-weight: 400;
-  color: #7c8ca3;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-.id-meta {
-  margin-top: 4px;
-  font-size: 12.5px;
-  color: #5c7189;
-}
-.id-meta b {
-  color: #2b6cb0;
-}
-.id-sep {
-  margin: 0 6px;
-  color: #c7d2e0;
-}
-
-/* 底部确认条：只保留布局属性；视觉样式（实底/边框/圆角/内边距）统一由下方"借还页布局改造"样式块定义，
-   此处不再重复声明，避免遗留与新方案矛盾的虚线框规则 */
-.confirm-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.confirm-summary {
-  font-size: 13.5px;
-  color: #5c7189;
-}
-</style>
-
-<!-- 2026-10-22 借还页布局改造：卡片分组 / 左 65% 操作 + 右 35% 读者卡 / 实底确认条 -->
+<!-- 2026-10-22 借还页布局改造：卡片分组 / 左 65% 操作 + 右 35% 读者卡 / 实底确认条
+     2026-11-18 P3（G-08）：原第一段 style 块与本段重复的 11 个选择器已删除，本段为唯一样式来源；
+     第一段独有的 14 条规则原样并入本段末尾，属性值零改动 -->
 <style scoped>
 .borrow-page {
   /* 底部留白：避开左下角助理浮动按钮（实测原遮挡确认条摘要 1936 px²）。 */
@@ -1403,4 +1237,82 @@ onBeforeUnmount(() => {
     flex-wrap: wrap;
   }
 }
+
+/* ===== 2026-11-18 P3 合并（G-08）：以下为原第一段 style 块中第二段未覆盖的规则，属性值零改动 ===== */
+
+.today-item {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;}
+.today-item.is-warn .today-num {
+  color: #c05621;}
+.step-block.is-disabled {
+  opacity: 0.55;}
+.step-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: #2b6cb0;}
+.step-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2d3d;}
+.step-hint {
+  font-size: 12px;
+  color: #9aa5b6;}
+.pick-hint {
+  font-size: 11.5px;
+  color: #b6c1d1;}
+.id-avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(140deg, #4a90d9, #2b6cb0);}
+.id-main {
+  flex: 1;
+  min-width: 0;}
+.id-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #16324f;}
+.id-no {
+  font-size: 12.5px;
+  font-weight: 400;
+  color: #7c8ca3;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;}
+.id-meta {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: #5c7189;}
+.id-meta b {
+  color: #2b6cb0;}
+@keyframes idIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.id-sep {
+  margin: 0 6px;
+  color: #c7d2e0;}
 </style>

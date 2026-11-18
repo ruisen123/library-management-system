@@ -36,7 +36,7 @@
       <el-table-column v-if="isReader" label="" width="90" align="right">
         <template #default><span class="view-hint">查看 ›</span></template>
       </el-table-column>
-      <el-table-column v-if="canEdit" label="操作" width="180" fixed="right">
+      <el-table-column v-if="canEdit" label="操作" width="180">
         <template #default="{ row }">
           <el-button v-if="row.status === 1" link type="warning" @click="toggleStatus(row)"
             >撤回</el-button
